@@ -1,12 +1,13 @@
 import { useState } from "react";
 import { DashboardLayout } from "@/components/dashboard/layout";
 import { EquipmentCard } from "@/components/equipment/equipment-card";  
+import { QRCodeModal } from "@/components/equipment/qr-code-modal";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Plus, Search, Filter, Activity } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 // Import medical equipment images
 import mriImage from "@/assets/mri-machine.jpg";
@@ -96,9 +97,12 @@ const mockEquipment = [
 export default function Equipment() {
   const userRole = "owner"; // This would come from auth context
   const tenantName = "RS Umum Daerah Bantul";
+  const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
+  const [qrModalOpen, setQrModalOpen] = useState(false);
+  const [selectedEquipment, setSelectedEquipment] = useState<any>(null);
 
   const filteredEquipment = mockEquipment.filter(equipment => {
     const matchesSearch = equipment.nama_alat.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -220,9 +224,15 @@ export default function Equipment() {
             <EquipmentCard 
               key={equipment.id} 
               equipment={equipment}
-              onEdit={(id) => console.log('Edit:', id)}
-              onViewQR={(id) => console.log('View QR:', id)}
-              onScheduleMaintenance={(id) => console.log('Schedule:', id)}
+              onEdit={(id) => navigate(`/equipment/${id}`)}
+              onViewQR={(id) => {
+                const equipment = mockEquipment.find(eq => eq.id === id);
+                if (equipment) {
+                  setSelectedEquipment(equipment);
+                  setQrModalOpen(true);
+                }
+              }}
+              onScheduleMaintenance={(id) => navigate('/maintenance')}
             />
           ))}
         </div>
@@ -244,6 +254,17 @@ export default function Equipment() {
           </Card>
         )}
       </div>
+      
+      {/* QR Code Modal */}
+      {selectedEquipment && (
+        <QRCodeModal
+          equipmentId={selectedEquipment.id}
+          equipmentName={selectedEquipment.nama_alat}
+          qrCode={selectedEquipment.qr_code}
+          isOpen={qrModalOpen}
+          onOpenChange={setQrModalOpen}
+        />
+      )}
     </DashboardLayout>
   );
 }

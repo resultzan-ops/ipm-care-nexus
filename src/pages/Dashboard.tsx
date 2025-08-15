@@ -1,9 +1,12 @@
+import { useState } from "react";
 import { DashboardLayout } from "@/components/dashboard/layout";
 import { StatsGrid } from "@/components/dashboard/stats-grid";
 import { EquipmentCard } from "@/components/equipment/equipment-card";
+import { QRCodeModal } from "@/components/equipment/qr-code-modal";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { Link, useNavigate } from "react-router-dom";
 import { 
   Calendar,
   Plus, 
@@ -75,6 +78,9 @@ const upcomingTasks = [
 export default function Dashboard() {
   const userRole = "owner"; // This would come from auth context
   const tenantName = "RS Umum Daerah Bantul";
+  const navigate = useNavigate();
+  const [qrModalOpen, setQrModalOpen] = useState(false);
+  const [selectedEquipment, setSelectedEquipment] = useState<any>(null);
 
   return (
     <DashboardLayout userRole={userRole} tenantName={tenantName}>
@@ -87,9 +93,11 @@ export default function Dashboard() {
               Medical Equipment Inspection & Preventive Maintenance System
             </p>
           </div>
-          <Button variant="medical" className="gap-2">
-            <Plus className="h-4 w-4" />
-            Add Equipment
+          <Button variant="medical" className="gap-2" asChild>
+            <Link to="/equipment/add">
+              <Plus className="h-4 w-4" />
+              Add Equipment
+            </Link>
           </Button>
         </div>
 
@@ -109,9 +117,11 @@ export default function Dashboard() {
                     className="pl-9 w-64"
                   />
                 </div>
-                <Button variant="outline" size="sm">
-                  <Activity className="h-4 w-4 mr-2" />
-                  All Equipment
+                <Button variant="outline" size="sm" asChild>
+                  <Link to="/equipment">
+                    <Activity className="h-4 w-4 mr-2" />
+                    All Equipment
+                  </Link>
                 </Button>
               </div>
             </div>
@@ -121,9 +131,15 @@ export default function Dashboard() {
                 <EquipmentCard 
                   key={equipment.id} 
                   equipment={equipment}
-                  onEdit={(id) => console.log('Edit:', id)}
-                  onViewQR={(id) => console.log('View QR:', id)}
-                  onScheduleMaintenance={(id) => console.log('Schedule:', id)}
+                  onEdit={(id) => navigate(`/equipment/${id}`)}
+                  onViewQR={(id) => {
+                    const equipment = mockEquipment.find(eq => eq.id === id);
+                    if (equipment) {
+                      setSelectedEquipment(equipment);
+                      setQrModalOpen(true);
+                    }
+                  }}
+                  onScheduleMaintenance={(id) => navigate('/maintenance')}
                 />
               ))}
             </div>
@@ -151,9 +167,11 @@ export default function Dashboard() {
                     }`} />
                   </div>
                 ))}
-                <Button variant="outline" className="w-full" size="sm">
-                  <Calendar className="h-4 w-4 mr-2" />
-                  View All Tasks
+                <Button variant="outline" className="w-full" size="sm" asChild>
+                  <Link to="/maintenance">
+                    <Calendar className="h-4 w-4 mr-2" />
+                    View All Tasks
+                  </Link>
                 </Button>
               </CardContent>
             </Card>
@@ -164,13 +182,17 @@ export default function Dashboard() {
                 <CardTitle>Quick Actions</CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
-                <Button variant="outline" className="w-full justify-start">
-                  <Plus className="h-4 w-4 mr-2" />
-                  Add New Equipment
+                <Button variant="outline" className="w-full justify-start" asChild>
+                  <Link to="/equipment/add">
+                    <Plus className="h-4 w-4 mr-2" />
+                    Add New Equipment
+                  </Link>
                 </Button>
-                <Button variant="outline" className="w-full justify-start">
-                  <Calendar className="h-4 w-4 mr-2" />
-                  Schedule Maintenance
+                <Button variant="outline" className="w-full justify-start" asChild>
+                  <Link to="/maintenance">
+                    <Calendar className="h-4 w-4 mr-2" />
+                    Schedule Maintenance
+                  </Link>
                 </Button>
                 <Button variant="outline" className="w-full justify-start">
                   <Bell className="h-4 w-4 mr-2" />
@@ -181,6 +203,17 @@ export default function Dashboard() {
           </div>
         </div>
       </div>
+      
+      {/* QR Code Modal */}
+      {selectedEquipment && (
+        <QRCodeModal
+          equipmentId={selectedEquipment.id}
+          equipmentName={selectedEquipment.nama_alat}
+          qrCode={selectedEquipment.qr_code}
+          isOpen={qrModalOpen}
+          onOpenChange={setQrModalOpen}
+        />
+      )}
     </DashboardLayout>
   );
 }

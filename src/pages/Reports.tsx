@@ -76,7 +76,7 @@ const reportTemplates = [
 ];
 
 export default function Reports() {
-  const userRole = "owner";
+  const userRole = "admin_klien";
   const tenantName = "RS Umum Daerah Bantul";
   const [selectedPeriod, setSelectedPeriod] = useState("monthly");
   const [selectedCategory, setSelectedCategory] = useState("all");

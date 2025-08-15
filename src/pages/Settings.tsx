@@ -12,7 +12,7 @@ import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 
 export default function Settings() {
-  const userRole = "owner";
+  const userRole = "admin_klien";
   const tenantName = "RS Umum Daerah Bantul";
   const { toast } = useToast();
 

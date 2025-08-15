@@ -103,7 +103,7 @@ export default function EquipmentDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
   const { toast } = useToast();
-  const userRole = "owner";
+  const userRole = "admin_klien";
   const tenantName = "RS Umum Daerah Bantul";
 
   const equipment = mockEquipmentData[id || "1"];

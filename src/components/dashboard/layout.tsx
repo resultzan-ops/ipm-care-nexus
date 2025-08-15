@@ -4,13 +4,13 @@ import { Header } from "./header";
 
 interface DashboardLayoutProps {
   children: ReactNode;
-  userRole?: "admin_super" | "admin_tenant" | "operator" | "teknisi" | "owner";
+  userRole?: "super_admin" | "admin_mitra" | "admin_klien" | "teknisi_mitra" | "operator_klien";
   tenantName?: string;
 }
 
 export function DashboardLayout({ 
   children, 
-  userRole = "owner",
+  userRole = "operator_klien",
   tenantName = "Rumah Sakit Umum Daerah"
 }: DashboardLayoutProps) {
   return (

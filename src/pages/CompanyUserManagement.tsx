@@ -123,7 +123,7 @@ export default function CompanyUserManagement() {
 
   if (profile?.role !== 'super_admin') {
     return (
-      <DashboardLayout userRole={profile?.role as any || "operator"} tenantName="IPM Care Nexus">
+      <DashboardLayout userRole={profile?.role as any || "operator_klien"} tenantName="IPM Care Nexus">
         <div className="flex items-center justify-center min-h-[400px]">
           <Card className="p-6">
             <div className="text-center">
@@ -137,7 +137,7 @@ export default function CompanyUserManagement() {
   }
 
   return (
-    <DashboardLayout userRole="admin_super" tenantName="IPM Care Nexus">
+    <DashboardLayout userRole="super_admin" tenantName="IPM Care Nexus">
       <div className="space-y-6">
         {/* Header */}
         <div className="flex items-center justify-between">

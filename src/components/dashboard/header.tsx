@@ -11,17 +11,15 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 
 interface HeaderProps {
   tenantName: string;
-  userRole: "admin_super" | "admin_tenant" | "operator" | "teknisi" | "owner";
+  userRole: "super_admin" | "admin_mitra" | "admin_klien" | "teknisi_mitra" | "operator_klien";
 }
 
 const roleLabels = {
   super_admin: "Super Admin",
-  admin_rs: "Admin RS",
-  admin_tenant: "Hospital Administrator", 
-  operator: "Equipment Operator",
-  kalibrator: "Kalibrator",
-  teknisi: "Maintenance Technician",
-  owner: "Hospital Owner",
+  admin_mitra: "Admin Mitra",
+  admin_klien: "Admin Klien", 
+  teknisi_mitra: "Teknisi Mitra",
+  operator_klien: "Operator Klien",
 };
 
 export function Header({ tenantName, userRole }: HeaderProps) {

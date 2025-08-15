@@ -60,7 +60,7 @@ const mockInspections = [
 ];
 
 export default function Inspections() {
-  const userRole = "owner";
+  const userRole = "admin_klien";
   const tenantName = "RS Umum Daerah Bantul";
   const [statusFilter, setStatusFilter] = useState("all");
   const [searchTerm, setSearchTerm] = useState("");

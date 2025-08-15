@@ -56,7 +56,7 @@ function StatsCard({ title, value, subtitle, icon: Icon, trend, className }: Sta
 }
 
 interface StatsGridProps {
-  userRole: "admin_super" | "admin_tenant" | "operator" | "teknisi" | "owner";
+  userRole: "super_admin" | "admin_mitra" | "admin_klien" | "teknisi_mitra" | "operator_klien";
 }
 
 export function StatsGrid({ userRole }: StatsGridProps) {
@@ -112,7 +112,7 @@ export function StatsGrid({ userRole }: StatsGridProps) {
         className="border-danger/20"
       />
       
-      {userRole === 'teknisi' && (
+      {userRole === 'teknisi_mitra' && (
         <>
           <StatsCard
             title="My Active Tasks"

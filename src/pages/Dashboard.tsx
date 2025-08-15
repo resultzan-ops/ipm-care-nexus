@@ -76,7 +76,7 @@ const upcomingTasks = [
 ];
 
 export default function Dashboard() {
-  const userRole = "owner"; // This would come from auth context
+  const userRole = "admin_klien"; // This would come from auth context
   const tenantName = "RS Umum Daerah Bantul";
   const navigate = useNavigate();
   const [qrModalOpen, setQrModalOpen] = useState(false);

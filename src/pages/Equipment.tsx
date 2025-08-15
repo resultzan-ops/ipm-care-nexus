@@ -95,7 +95,7 @@ const mockEquipment = [
 ];
 
 export default function Equipment() {
-  const userRole = "owner"; // This would come from auth context
+  const userRole = "admin_klien"; // This would come from auth context
   const tenantName = "RS Umum Daerah Bantul";
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState("");

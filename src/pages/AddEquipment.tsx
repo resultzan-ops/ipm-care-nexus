@@ -13,7 +13,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 
 export default function AddEquipment() {
-  const userRole = "owner";
+  const userRole = "admin_klien";
   const tenantName = "RS Umum Daerah Bantul";
   const navigate = useNavigate();
   const { toast } = useToast();

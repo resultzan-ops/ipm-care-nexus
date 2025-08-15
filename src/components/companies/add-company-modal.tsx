@@ -16,7 +16,7 @@ interface AddCompanyModalProps {
 
 export function AddCompanyModal({ open, onOpenChange }: AddCompanyModalProps) {
   const [namaPerusahaan, setNamaPerusahaan] = useState("");
-  const [companyType, setCompanyType] = useState<'IPM' | 'Mitra Kalibrasi' | 'Rumah Sakit / Perusahaan'>('Rumah Sakit / Perusahaan');
+  const [companyType, setCompanyType] = useState<'Mitra Penyedia (Kalibrasi)' | 'Mitra Penyedia (Barang & Jasa)' | 'Klien Rumah Sakit/Perusahaan'>('Klien Rumah Sakit/Perusahaan');
   const [alamat, setAlamat] = useState("");
   const [telepon, setTelepon] = useState("");
   const [email, setEmail] = useState("");
@@ -43,7 +43,7 @@ export function AddCompanyModal({ open, onOpenChange }: AddCompanyModalProps) {
           telepon: companyData.telepon || null,
           phone: companyData.telepon || null, // Keep legacy phone field
           email: companyData.email || null,
-          type: companyData.company_type === 'Rumah Sakit / Perusahaan' ? 'rumah_sakit' : 'perusahaan'
+          type: companyData.company_type === 'Klien Rumah Sakit/Perusahaan' ? 'rumah_sakit' : 'perusahaan'
         }])
         .select()
         .single();
@@ -68,7 +68,7 @@ export function AddCompanyModal({ open, onOpenChange }: AddCompanyModalProps) {
 
   const resetForm = () => {
     setNamaPerusahaan("");
-    setCompanyType('Rumah Sakit / Perusahaan');
+    setCompanyType('Klien Rumah Sakit/Perusahaan');
     setAlamat("");
     setTelepon("");
     setEmail("");
@@ -120,9 +120,9 @@ export function AddCompanyModal({ open, onOpenChange }: AddCompanyModalProps) {
                 <SelectValue placeholder="Pilih tipe perusahaan" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="IPM">IPM</SelectItem>
-                <SelectItem value="Mitra Kalibrasi">Mitra Kalibrasi</SelectItem>
-                <SelectItem value="Rumah Sakit / Perusahaan">Rumah Sakit / Perusahaan</SelectItem>
+                <SelectItem value="Mitra Penyedia (Kalibrasi)">Mitra Penyedia (Kalibrasi)</SelectItem>
+                <SelectItem value="Mitra Penyedia (Barang & Jasa)">Mitra Penyedia (Barang & Jasa)</SelectItem>
+                <SelectItem value="Klien Rumah Sakit/Perusahaan">Klien Rumah Sakit/Perusahaan</SelectItem>
               </SelectContent>
             </Select>
           </div>

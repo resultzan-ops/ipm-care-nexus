@@ -2,6 +2,7 @@ import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { 
   Activity, 
+  Building,
   Calendar, 
   ClipboardCheck, 
   Gauge, 
@@ -32,6 +33,7 @@ const menuItems = {
     { icon: ClipboardCheck, label: "Inspections", href: "/inspections" },
     { icon: Wrench, label: "Calibrations", href: "/calibrations" },
     { icon: Users, label: "Users", href: "/users" },
+    { icon: Building, label: "Company Profile", href: "/company-profile" },
     { icon: FileText, label: "Reports", href: "/reports" },
     { icon: Settings, label: "Settings", href: "/settings" },
   ],
@@ -55,6 +57,7 @@ const menuItems = {
     { icon: ClipboardCheck, label: "Inspections", href: "/inspections" },
     { icon: Wrench, label: "Calibrations", href: "/calibrations" },
     { icon: Users, label: "Users", href: "/users" },
+    { icon: Building, label: "Company Profile", href: "/company-profile" },
     { icon: FileText, label: "Reports", href: "/reports" },
     { icon: Settings, label: "Settings", href: "/settings" },
   ],

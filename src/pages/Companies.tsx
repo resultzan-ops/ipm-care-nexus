@@ -27,10 +27,15 @@ import { EditCompanyModal } from "@/components/companies/edit-company-modal";
 interface Company {
   id: string;
   nama_perusahaan: string;
-  company_type: 'IPM' | 'Mitra Kalibrasi' | 'Rumah Sakit / Perusahaan';
+  company_type: 'Mitra Penyedia (Kalibrasi)' | 'Mitra Penyedia (Barang & Jasa)' | 'Klien Rumah Sakit/Perusahaan';
   alamat: string | null;
   telepon: string | null;
   email: string | null;
+  whatsapp: string | null;
+  description: string | null;
+  logo_url: string | null;
+  address: string | null;
+  contact: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -89,12 +94,12 @@ export default function Companies() {
 
   const getCompanyTypeBadge = (type: string) => {
     switch (type) {
-      case "IPM":
-        return <Badge className="bg-blue-100 text-blue-800 hover:bg-blue-100">IPM</Badge>;
-      case "Mitra Kalibrasi":
-        return <Badge className="bg-orange-100 text-orange-800 hover:bg-orange-100">Mitra Kalibrasi</Badge>;
-      case "Rumah Sakit / Perusahaan":
-        return <Badge className="bg-green-100 text-green-800 hover:bg-green-100">Klien</Badge>;
+      case "Mitra Penyedia (Kalibrasi)":
+        return <Badge className="bg-blue-100 text-blue-800 hover:bg-blue-100">Mitra Kalibrasi</Badge>;
+      case "Mitra Penyedia (Barang & Jasa)":
+        return <Badge className="bg-green-100 text-green-800 hover:bg-green-100">Mitra Barang & Jasa</Badge>;
+      case "Klien Rumah Sakit/Perusahaan":
+        return <Badge className="bg-purple-100 text-purple-800 hover:bg-purple-100">Klien</Badge>;
       default:
         return <Badge variant="secondary">{type}</Badge>;
     }
@@ -102,11 +107,11 @@ export default function Companies() {
 
   const getStatistics = () => {
     const total = companies.length;
-    const ipm = companies.filter(c => c.company_type === 'IPM').length;
-    const mitra = companies.filter(c => c.company_type === 'Mitra Kalibrasi').length;
-    const klien = companies.filter(c => c.company_type === 'Rumah Sakit / Perusahaan').length;
+    const kalibrasi = companies.filter(c => c.company_type === 'Mitra Penyedia (Kalibrasi)').length;
+    const barangJasa = companies.filter(c => c.company_type === 'Mitra Penyedia (Barang & Jasa)').length;
+    const klien = companies.filter(c => c.company_type === 'Klien Rumah Sakit/Perusahaan').length;
     
-    return { total, ipm, mitra, klien };
+    return { total, kalibrasi, barangJasa, klien };
   };
 
   const stats = getStatistics();
@@ -161,18 +166,7 @@ export default function Companies() {
               <div className="flex items-center gap-2">
                 <Building2 className="h-8 w-8 text-blue-600" />
                 <div>
-                  <p className="text-2xl font-bold">{stats.ipm}</p>
-                  <p className="text-sm text-muted-foreground">IPM</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="p-6">
-              <div className="flex items-center gap-2">
-                <Building2 className="h-8 w-8 text-orange-600" />
-                <div>
-                  <p className="text-2xl font-bold">{stats.mitra}</p>
+                  <p className="text-2xl font-bold">{stats.kalibrasi}</p>
                   <p className="text-sm text-muted-foreground">Mitra Kalibrasi</p>
                 </div>
               </div>
@@ -183,8 +177,19 @@ export default function Companies() {
               <div className="flex items-center gap-2">
                 <Building2 className="h-8 w-8 text-green-600" />
                 <div>
+                  <p className="text-2xl font-bold">{stats.barangJasa}</p>
+                  <p className="text-sm text-muted-foreground">Mitra Barang & Jasa</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="p-6">
+              <div className="flex items-center gap-2">
+                <Building2 className="h-8 w-8 text-purple-600" />
+                <div>
                   <p className="text-2xl font-bold">{stats.klien}</p>
-                  <p className="text-sm text-muted-foreground">Klien</p>
+                  <p className="text-sm text-muted-foreground">Klien RS/Perusahaan</p>
                 </div>
               </div>
             </CardContent>

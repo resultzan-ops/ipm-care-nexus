@@ -93,8 +93,8 @@ export default function Users() {
       (statusFilter === "inactive" && !user.is_active);
     const matchesCompany = companyFilter === "all" || user.company_id === companyFilter;
     const matchesCompanyType = companyTypeFilter === "all" ||
-      (companyTypeFilter === "mitra" && (user.tenants?.company_type === "Mitra Kalibrasi" || user.tenants?.company_type === "IPM")) ||
-      (companyTypeFilter === "klien" && user.tenants?.company_type === "Rumah Sakit / Perusahaan");
+      (companyTypeFilter === "mitra" && (user.tenants?.company_type === "Mitra Penyedia (Kalibrasi)" || user.tenants?.company_type === "Mitra Penyedia (Barang & Jasa)")) ||
+      (companyTypeFilter === "klien" && user.tenants?.company_type === "Klien Rumah Sakit/Perusahaan");
     const matchesSearch = user.nama_lengkap.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          user.role.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          user.tenants?.nama_perusahaan?.toLowerCase().includes(searchTerm.toLowerCase());
@@ -109,14 +109,14 @@ export default function Users() {
     
     // Filter by company type
     const mitraUsers = profiles.filter(p => 
-      p.tenants?.company_type === "Mitra Kalibrasi" || 
-      p.tenants?.company_type === "IPM" ||
+      p.tenants?.company_type === "Mitra Penyedia (Kalibrasi)" || 
+      p.tenants?.company_type === "Mitra Penyedia (Barang & Jasa)" ||
       p.role === "admin_mitra" || 
       p.role === "teknisi_mitra"
     ).length;
     
     const klienUsers = profiles.filter(p => 
-      p.tenants?.company_type === "Rumah Sakit / Perusahaan" ||
+      p.tenants?.company_type === "Klien Rumah Sakit/Perusahaan" ||
       p.role === "admin_klien" || 
       p.role === "operator_klien"
     ).length;
@@ -348,7 +348,7 @@ export default function Users() {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">All Types</SelectItem>
-                  <SelectItem value="mitra">Mitra (IPM & Kalibrasi)</SelectItem>
+                  <SelectItem value="mitra">Mitra (Kalibrasi & Barang Jasa)</SelectItem>
                   <SelectItem value="klien">Klien (Rumah Sakit)</SelectItem>
                 </SelectContent>
               </Select>

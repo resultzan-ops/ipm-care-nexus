@@ -22,7 +22,8 @@ import CalibrationHistory from "./pages/CalibrationHistory";
 import Reports from "./pages/Reports";
 import Users from "./pages/Users";
 import UserManagement from "./pages/UserManagement";
-import CompanyProfile from "./pages/CompanyProfile";
+import Companies from "./pages/Companies";
+import CompanyUserManagement from "./pages/CompanyUserManagement";
 import Settings from "./pages/Settings";
 import PromoteSuperAdmin from "./pages/PromoteSuperAdmin";
 
@@ -59,7 +60,8 @@ const App = () => {
             <Route path="/reports" element={<ProtectedRoute><Reports /></ProtectedRoute>} />
             <Route path="/users" element={<ProtectedRoute><Users /></ProtectedRoute>} />
             <Route path="/user-management" element={<ProtectedRoute><UserManagement /></ProtectedRoute>} />
-            <Route path="/company-profile" element={<ProtectedRoute><CompanyProfile /></ProtectedRoute>} />
+            <Route path="/companies" element={<ProtectedRoute><Companies /></ProtectedRoute>} />
+            <Route path="/company-user-management" element={<ProtectedRoute><CompanyUserManagement /></ProtectedRoute>} />
             <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
             <Route path="/promote-super-admin" element={<ProtectedRoute><PromoteSuperAdmin /></ProtectedRoute>} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}

@@ -22,8 +22,9 @@ interface SidebarProps {
 const menuItems = {
   admin_super: [
     { icon: Shield, label: "Super Admin", href: "/admin-super" },
-    { icon: Hospital, label: "Manage Tenants", href: "/tenants" },
-    { icon: Users, label: "All Users", href: "/users" },
+    { icon: Building, label: "Perusahaan & User", href: "/company-user-management" },
+    { icon: Building, label: "Manajemen Perusahaan", href: "/companies" },
+    { icon: Users, label: "Manajemen User", href: "/users" },
     { icon: FileText, label: "Global Reports", href: "/global-reports" },
   ],
   admin_tenant: [
@@ -33,7 +34,6 @@ const menuItems = {
     { icon: ClipboardCheck, label: "Inspections", href: "/inspections" },
     { icon: Wrench, label: "Calibrations", href: "/calibrations" },
     { icon: Users, label: "Users", href: "/users" },
-    { icon: Building, label: "Company Profile", href: "/company-profile" },
     { icon: FileText, label: "Reports", href: "/reports" },
     { icon: Settings, label: "Settings", href: "/settings" },
   ],
@@ -57,7 +57,6 @@ const menuItems = {
     { icon: ClipboardCheck, label: "Inspections", href: "/inspections" },
     { icon: Wrench, label: "Calibrations", href: "/calibrations" },
     { icon: Users, label: "Users", href: "/users" },
-    { icon: Building, label: "Company Profile", href: "/company-profile" },
     { icon: FileText, label: "Reports", href: "/reports" },
     { icon: Settings, label: "Settings", href: "/settings" },
   ],

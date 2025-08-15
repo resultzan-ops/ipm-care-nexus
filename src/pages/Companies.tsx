@@ -139,7 +139,7 @@ export default function Companies() {
           <div>
             <h1 className="text-3xl font-bold">Manajemen Perusahaan</h1>
             <p className="text-muted-foreground mt-1">
-              Kelola perusahaan IPM, mitra kalibrasi, dan klien
+              Kelola perusahaan mitra dan klien untuk memastikan user management yang tepat sesuai dengan akses menu masing-masing
             </p>
           </div>
           <Button variant="medical" className="gap-2" onClick={() => setAddCompanyModalOpen(true)}>

@@ -43,11 +43,11 @@ export default function Users() {
         .from('profiles')
         .select(`
           *,
-          tenants!inner(name)
+          tenants(name)
         `);
       
       if (error) throw error;
-      return data as (Profile & { tenants: { name: string } })[];
+      return data as (Profile & { tenants: { name: string } | null })[];
     }
   });
 

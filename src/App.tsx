@@ -18,6 +18,7 @@ import Inspections from "./pages/Inspections";
 import Calibrations from "./pages/Calibrations";
 import Reports from "./pages/Reports";
 import Users from "./pages/Users";
+import UserManagement from "./pages/UserManagement";
 import Settings from "./pages/Settings";
 
 const App = () => {
@@ -49,6 +50,7 @@ const App = () => {
             <Route path="/calibrations" element={<ProtectedRoute><Calibrations /></ProtectedRoute>} />
             <Route path="/reports" element={<ProtectedRoute><Reports /></ProtectedRoute>} />
             <Route path="/users" element={<ProtectedRoute><Users /></ProtectedRoute>} />
+            <Route path="/user-management" element={<ProtectedRoute><UserManagement /></ProtectedRoute>} />
             <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />

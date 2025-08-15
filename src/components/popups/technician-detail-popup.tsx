@@ -21,7 +21,7 @@ export function TechnicianDetailPopup({ open, onOpenChange, technicianId }: Tech
         .from('profiles')
         .select(`
           *,
-          tenants(name, type)
+          tenants!profiles_company_id_fkey(nama_perusahaan, company_type)
         `)
         .eq('user_id', technicianId)
         .maybeSingle();
@@ -129,7 +129,7 @@ export function TechnicianDetailPopup({ open, onOpenChange, technicianId }: Tech
                   {technician.tenants && (
                     <div className="flex items-center gap-2">
                       <MapPin className="h-4 w-4 text-muted-foreground" />
-                      <span className="text-sm">{technician.tenants.name}</span>
+                      <span className="text-sm">{technician.tenants?.nama_perusahaan}</span>
                     </div>
                   )}
                 </div>

@@ -80,7 +80,7 @@ export default function Maintenance() {
           role,
           tenants(id, name, type)
         `)
-        .in('role', ['teknisi', 'teknisi_rs'])
+        .in('role', ['teknisi_mitra'])
         .eq('is_active', true);
       if (error) throw error;
       return data;

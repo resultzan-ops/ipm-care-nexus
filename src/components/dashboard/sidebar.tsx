@@ -12,6 +12,7 @@ import {
   FileText,
   Shield
 } from "lucide-react";
+import { Link, useLocation } from "react-router-dom";
 
 interface SidebarProps {
   userRole: "admin_super" | "admin_tenant" | "operator" | "teknisi" | "owner";
@@ -57,6 +58,7 @@ const menuItems = {
 
 export function Sidebar({ userRole }: SidebarProps) {
   const items = menuItems[userRole] || menuItems.owner;
+  const location = useLocation();
 
   return (
     <div className="w-64 bg-card border-r border-border h-screen flex flex-col">
@@ -74,14 +76,18 @@ export function Sidebar({ userRole }: SidebarProps) {
       
       <nav className="flex-1 p-4 space-y-2">
         {items.map((item) => (
-          <Button
-            key={item.href}
-            variant="ghost"
-            className="w-full justify-start text-left"
-          >
-            <item.icon className="h-4 w-4 mr-3" />
-            {item.label}
-          </Button>
+          <Link key={item.href} to={item.href}>
+            <Button
+              variant="ghost"
+              className={cn(
+                "w-full justify-start text-left",
+                location.pathname === item.href && "bg-primary/10 text-primary"
+              )}
+            >
+              <item.icon className="h-4 w-4 mr-3" />
+              {item.label}
+            </Button>
+          </Link>
         ))}
       </nav>
     </div>

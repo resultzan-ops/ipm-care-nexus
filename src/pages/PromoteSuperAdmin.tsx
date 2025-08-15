@@ -19,18 +19,35 @@ export default function PromoteSuperAdmin() {
   const promote = async () => {
     if (!user) return;
     setLoading(true);
-    const { error } = await supabase
-      .from("profiles")
-      .update({ role: "super_admin" as any })
-      .eq("user_id", user.id);
+    
+    try {
+      // First try to update using RPC or direct admin update
+      const { error } = await supabase.rpc('promote_to_super_admin', {
+        target_user_id: user.id
+      });
 
-    setLoading(false);
-    if (error) {
-      toast({ title: "Gagal mempromosikan", description: error.message, variant: "destructive" });
-      return;
+      if (error) {
+        // Fallback: direct update (might fail due to RLS)
+        const { error: updateError } = await supabase
+          .from("profiles")
+          .update({ role: "super_admin" as any })
+          .eq("user_id", user.id);
+        
+        if (updateError) throw updateError;
+      }
+
+      toast({ title: "Berhasil", description: "Akun Anda sekarang super_admin" });
+      // Force refresh auth state
+      window.location.reload();
+    } catch (error: any) {
+      toast({ 
+        title: "Gagal mempromosikan", 
+        description: `Error: ${error.message}`,
+        variant: "destructive" 
+      });
+    } finally {
+      setLoading(false);
     }
-    toast({ title: "Berhasil", description: "Akun Anda sekarang super_admin" });
-    navigate("/users", { replace: true });
   };
 
   const canPromote = !!user && user.email?.toLowerCase() === targetEmail.toLowerCase();

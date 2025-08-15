@@ -97,8 +97,8 @@ export default function Maintenance() {
     const matchesSearch = item.equipment_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          item.technician.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          item.location.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesStatus = !statusFilter || item.status === statusFilter;
-    const matchesPriority = !priorityFilter || item.priority === priorityFilter;
+    const matchesStatus = !statusFilter || statusFilter === "all" || item.status === statusFilter;
+    const matchesPriority = !priorityFilter || priorityFilter === "all" || item.priority === priorityFilter;
     const matchesDate = !selectedDate || 
                        format(item.scheduled_date, 'yyyy-MM-dd') === format(selectedDate, 'yyyy-MM-dd');
     
@@ -235,7 +235,7 @@ export default function Maintenance() {
                   <SelectValue placeholder="Filter by status" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">All Status</SelectItem>
+                  <SelectItem value="all">All Status</SelectItem>
                   <SelectItem value="scheduled">Scheduled</SelectItem>
                   <SelectItem value="in_progress">In Progress</SelectItem>
                   <SelectItem value="completed">Completed</SelectItem>
@@ -248,7 +248,7 @@ export default function Maintenance() {
                   <SelectValue placeholder="Filter by priority" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">All Priority</SelectItem>
+                  <SelectItem value="all">All Priority</SelectItem>
                   <SelectItem value="high">High</SelectItem>
                   <SelectItem value="medium">Medium</SelectItem>
                   <SelectItem value="low">Low</SelectItem>
@@ -281,12 +281,12 @@ export default function Maintenance() {
               <Button 
                 variant="outline" 
                 size="icon"
-                onClick={() => {
-                  setSearchTerm("");
-                  setStatusFilter("");
-                  setPriorityFilter("");
-                  setSelectedDate(undefined);
-                }}
+              onClick={() => {
+                setSearchTerm("");
+                setStatusFilter("all");
+                setPriorityFilter("all");
+                setSelectedDate(undefined);
+              }}
               >
                 <Filter className="h-4 w-4" />
               </Button>
@@ -381,8 +381,8 @@ export default function Maintenance() {
             </p>
             <Button variant="outline" onClick={() => {
               setSearchTerm("");
-              setStatusFilter("");
-              setPriorityFilter("");
+              setStatusFilter("all");
+              setPriorityFilter("all");
               setSelectedDate(undefined);
             }}>
               Clear Filters

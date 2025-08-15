@@ -38,6 +38,7 @@ export function AddUserModal({ open, onOpenChange }: AddUserModalProps) {
           email: userData.email,
           password: userData.password,
           options: {
+            emailRedirectTo: `${window.location.origin}/`,
             data: {
               name: userData.name
             }
@@ -55,22 +56,48 @@ export function AddUserModal({ open, onOpenChange }: AddUserModalProps) {
 
         console.log('Auth user created:', authUser.user.id);
 
-        // Create profile
-        const { data: profile, error: profileError } = await supabase
-          .from('profiles')
-          .insert({
-            user_id: authUser.user.id,
-            name: userData.name,
-            role: userData.role as any,
-            phone: userData.phone,
-            is_active: true
-          })
-          .select()
-          .single();
+        // Wait a bit to ensure the user is properly created in auth.users
+        await new Promise(resolve => setTimeout(resolve, 1000));
 
-        if (profileError) {
-          console.error('Profile creation error:', profileError);
-          throw new Error(profileError.message);
+        // Create profile with retry logic
+        let profile;
+        let attempts = 0;
+        const maxAttempts = 3;
+
+        while (attempts < maxAttempts) {
+          try {
+            const { data: profileData, error: profileError } = await supabase
+              .from('profiles')
+              .insert({
+                user_id: authUser.user.id,
+                name: userData.name,
+                role: userData.role as any,
+                phone: userData.phone,
+                is_active: true
+              })
+              .select()
+              .single();
+
+            if (profileError) {
+              console.error(`Profile creation error (attempt ${attempts + 1}):`, profileError);
+              if (attempts === maxAttempts - 1) {
+                throw new Error(profileError.message);
+              }
+              attempts++;
+              await new Promise(resolve => setTimeout(resolve, 1000));
+              continue;
+            }
+
+            profile = profileData;
+            break;
+          } catch (err) {
+            console.error(`Profile creation failed (attempt ${attempts + 1}):`, err);
+            if (attempts === maxAttempts - 1) {
+              throw err;
+            }
+            attempts++;
+            await new Promise(resolve => setTimeout(resolve, 1000));
+          }
         }
 
         console.log('Profile created successfully:', profile);

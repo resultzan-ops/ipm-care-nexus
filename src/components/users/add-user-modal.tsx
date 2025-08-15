@@ -30,23 +30,53 @@ export function AddUserModal({ open, onOpenChange }: AddUserModalProps) {
       role: string;
       phone?: string;
     }) => {
-      console.log('Attempting to call create-user function with data:', userData);
+      console.log('Creating user with data:', userData);
       
       try {
-        // Call the create-user edge function
-        const { data, error } = await supabase.functions.invoke('create-user', {
-          body: userData
+        // Create user using Supabase auth directly
+        const { data: authUser, error: authError } = await supabase.auth.signUp({
+          email: userData.email,
+          password: userData.password,
+          options: {
+            data: {
+              name: userData.name
+            }
+          }
         });
 
-        console.log('Edge function response:', { data, error });
-
-        if (error) {
-          console.error('Edge function error:', error);
-          throw error;
+        if (authError) {
+          console.error('Auth error:', authError);
+          throw new Error(authError.message);
         }
-        return data;
+
+        if (!authUser.user) {
+          throw new Error('User creation failed');
+        }
+
+        console.log('Auth user created:', authUser.user.id);
+
+        // Create profile
+        const { data: profile, error: profileError } = await supabase
+          .from('profiles')
+          .insert({
+            user_id: authUser.user.id,
+            name: userData.name,
+            role: userData.role as any,
+            phone: userData.phone,
+            is_active: true
+          })
+          .select()
+          .single();
+
+        if (profileError) {
+          console.error('Profile creation error:', profileError);
+          throw new Error(profileError.message);
+        }
+
+        console.log('Profile created successfully:', profile);
+        return { user: authUser.user, profile };
       } catch (err) {
-        console.error('Failed to call edge function:', err);
+        console.error('Failed to create user:', err);
         throw err;
       }
     },

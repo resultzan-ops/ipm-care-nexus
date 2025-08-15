@@ -29,20 +29,23 @@ import { EditUserModal } from "@/components/users/edit-user-modal";
 interface Profile {
   id: string;
   user_id: string;
-  name: string;
-  role: string;
-  tenant_id: string | null;
-  phone: string | null;
+  nama_lengkap: string;
+  role: 'super_admin' | 'admin_mitra' | 'teknisi_mitra' | 'admin_klien' | 'operator_klien';
+  company_id: string | null;
+  no_hp: string | null;
   avatar_url: string | null;
   is_active: boolean;
   created_at: string;
   updated_at: string;
+  tenants?: {
+    nama_perusahaan: string;
+    company_type: string;
+  } | null;
 }
 
 export default function Users() {
   const { profile } = useAuth();
-  const userRole = (profile?.role as "teknisi" | "operator" | "admin_tenant" | "admin_super" | "owner") || "teknisi";
-  const tenantName = "RS Umum Daerah Bantul";
+  const [companyFilter, setCompanyFilter] = useState("all");
   const [roleFilter, setRoleFilter] = useState("all");
   const [statusFilter, setStatusFilter] = useState("all");
   const [searchTerm, setSearchTerm] = useState("");
@@ -52,7 +55,7 @@ export default function Users() {
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
-  // Fetch real user profiles from Supabase
+  // Fetch user profiles from Supabase
   const { data: profiles = [], isLoading } = useQuery({
     queryKey: ['profiles'],
     queryFn: async () => {
@@ -60,11 +63,25 @@ export default function Users() {
         .from('profiles')
         .select(`
           *,
-          tenants(name)
+          tenants!profiles_company_id_fkey(nama_perusahaan, company_type)
         `);
       
       if (error) throw error;
-      return data as (Profile & { tenants: { name: string } | null })[];
+      return data as Profile[];
+    }
+  });
+
+  // Fetch companies for filter
+  const { data: companies = [] } = useQuery({
+    queryKey: ['companies'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('tenants')
+        .select('id, nama_perusahaan, company_type')
+        .order('nama_perusahaan');
+      
+      if (error) throw error;
+      return data;
     }
   });
 
@@ -73,16 +90,18 @@ export default function Users() {
     const matchesStatus = statusFilter === "all" || 
       (statusFilter === "active" && user.is_active) ||
       (statusFilter === "inactive" && !user.is_active);
-    const matchesSearch = user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         user.role.toLowerCase().includes(searchTerm.toLowerCase());
-    return matchesRole && matchesStatus && matchesSearch;
+    const matchesCompany = companyFilter === "all" || user.company_id === companyFilter;
+    const matchesSearch = user.nama_lengkap.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         user.role.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         user.tenants?.nama_perusahaan?.toLowerCase().includes(searchTerm.toLowerCase());
+    return matchesRole && matchesStatus && matchesCompany && matchesSearch;
   });
 
   const getStatistics = () => {
     const total = profiles.length;
-    const admins = profiles.filter(p => p.role === 'admin_tenant' || p.role === 'super_admin').length;
-    const operators = profiles.filter(p => p.role === 'operator').length;
-    const technicians = profiles.filter(p => p.role === 'teknisi').length;
+    const admins = profiles.filter(p => p.role === 'super_admin' || p.role === 'admin_mitra' || p.role === 'admin_klien').length;
+    const operators = profiles.filter(p => p.role === 'operator_klien').length;
+    const technicians = profiles.filter(p => p.role === 'teknisi_mitra').length;
     
     return { total, admins, operators, technicians };
   };
@@ -98,39 +117,32 @@ export default function Users() {
             Super Admin
           </Badge>
         );
-      case "admin_rs":
+      case "admin_mitra":
         return (
           <Badge variant="default" className="gap-1">
             <Shield className="h-3 w-3" />
-            Admin RS
+            Admin Mitra
           </Badge>
         );
-      case "admin_tenant":
+      case "teknisi_mitra":
+        return (
+          <Badge variant="secondary" className="gap-1">
+            <Settings className="h-3 w-3" />
+            Teknisi Mitra
+          </Badge>
+        );
+      case "admin_klien":
         return (
           <Badge variant="default" className="gap-1">
             <Shield className="h-3 w-3" />
-            Admin
+            Admin Klien
           </Badge>
         );
-      case "operator":
+      case "operator_klien":
         return (
           <Badge variant="outline" className="gap-1">
             <User className="h-3 w-3" />
-            Operator
-          </Badge>
-        );
-      case "kalibrator":
-        return (
-          <Badge variant="secondary" className="gap-1">
-            <Settings className="h-3 w-3" />
-            Kalibrator
-          </Badge>
-        );
-      case "teknisi":
-        return (
-          <Badge variant="secondary" className="gap-1">
-            <Settings className="h-3 w-3" />
-            Teknisi
+            Operator Klien
           </Badge>
         );
       default:
@@ -155,8 +167,37 @@ export default function Users() {
     }
   };
 
+  const getCompanyTypeBadge = (type: string) => {
+    switch (type) {
+      case "IPM":
+        return <Badge className="bg-blue-100 text-blue-800 hover:bg-blue-100">IPM</Badge>;
+      case "Mitra Kalibrasi":
+        return <Badge className="bg-orange-100 text-orange-800 hover:bg-orange-100">Mitra Kalibrasi</Badge>;
+      case "Rumah Sakit / Perusahaan":
+        return <Badge className="bg-green-100 text-green-800 hover:bg-green-100">Klien</Badge>;
+      default:
+        return <Badge variant="secondary">{type}</Badge>;
+    }
+  };
+
+  // Show access denied if not authorized
+  if (profile?.role !== 'super_admin' && profile?.role !== 'admin_mitra' && profile?.role !== 'admin_klien') {
+    return (
+      <DashboardLayout userRole={profile?.role as any || "operator_klien"} tenantName="IPM Care Nexus">
+        <div className="flex items-center justify-center min-h-[400px]">
+          <Card className="p-6">
+            <div className="text-center">
+              <h2 className="text-xl font-semibold mb-2">Akses Ditolak</h2>
+              <p className="text-muted-foreground">Anda tidak memiliki akses ke halaman ini.</p>
+            </div>
+          </Card>
+        </div>
+      </DashboardLayout>
+    );
+  }
+
   return (
-    <DashboardLayout userRole={userRole} tenantName={tenantName}>
+    <DashboardLayout userRole={profile?.role as any || "operator_klien"} tenantName="IPM Care Nexus">
       <div className="space-y-6">
         <div className="flex items-center justify-between">
           <div>
@@ -240,11 +281,24 @@ export default function Users() {
                 <SelectContent>
                   <SelectItem value="all">All Roles</SelectItem>
                   <SelectItem value="super_admin">Super Admin</SelectItem>
-                  <SelectItem value="admin_rs">Admin RS</SelectItem>
-                  <SelectItem value="admin_tenant">Administrator</SelectItem>
-                  <SelectItem value="operator">Operator</SelectItem>
-                  <SelectItem value="kalibrator">Kalibrator</SelectItem>
-                  <SelectItem value="teknisi">Teknisi</SelectItem>
+                  <SelectItem value="admin_mitra">Admin Mitra</SelectItem>
+                  <SelectItem value="teknisi_mitra">Teknisi Mitra</SelectItem>
+                  <SelectItem value="admin_klien">Admin Klien</SelectItem>
+                  <SelectItem value="operator_klien">Operator Klien</SelectItem>
+                </SelectContent>
+              </Select>
+              <Select value={companyFilter} onValueChange={setCompanyFilter}>
+                <SelectTrigger className="w-48">
+                  <Filter className="h-4 w-4 mr-2" />
+                  <SelectValue placeholder="Filter by company" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Companies</SelectItem>
+                  {companies.map((company) => (
+                    <SelectItem key={company.id} value={company.id}>
+                      {company.nama_perusahaan}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
               <Select value={statusFilter} onValueChange={setStatusFilter}>
@@ -295,27 +349,28 @@ export default function Users() {
                           <Avatar>
                             <AvatarImage src={user.avatar_url || undefined} />
                             <AvatarFallback>
-                              {user.name.split(' ').map(n => n[0]).join('')}
+                              {user.nama_lengkap.split(' ').map(n => n[0]).join('')}
                             </AvatarFallback>
                           </Avatar>
                           <div>
-                            <div className="font-medium">{user.name}</div>
+                            <div className="font-medium">{user.nama_lengkap}</div>
                             <div className="text-sm text-muted-foreground">
-                              {user.role === 'admin_tenant' ? 'Administrator' : 
-                               user.role === 'admin_rs' ? 'Admin RS' : 
-                               user.role === 'operator' ? 'Operator' : 
-                               user.role === 'kalibrator' ? 'Kalibrator' : 
-                               user.role === 'teknisi' ? 'Teknisi' : 
-                               user.role === 'super_admin' ? 'Super Admin' : 
-                               user.role}
+                              {user.role}
                             </div>
                           </div>
                         </div>
                       </TableCell>
                       <TableCell>{getRoleBadge(user.role)}</TableCell>
-                      <TableCell>{(user as any).tenants?.name || 'N/A'}</TableCell>
+                      <TableCell>
+                        <div className="flex flex-col">
+                          <span className="font-medium">{user.tenants?.nama_perusahaan || 'N/A'}</span>
+                          {user.tenants?.company_type && (
+                            <span className="text-xs">{getCompanyTypeBadge(user.tenants.company_type)}</span>
+                          )}
+                        </div>
+                      </TableCell>
                       <TableCell>{getStatusBadge(user.is_active)}</TableCell>
-                      <TableCell className="text-sm">{user.phone || 'N/A'}</TableCell>
+                      <TableCell className="text-sm">{user.no_hp || 'N/A'}</TableCell>
                       <TableCell>
                         <div className="flex items-center gap-1">
                           <Button variant="ghost" size="sm" className="gap-1">
@@ -375,7 +430,13 @@ export default function Users() {
         <EditUserModal
           open={editUserModalOpen}
           onOpenChange={setEditUserModalOpen}
-          user={selectedUser}
+          user={selectedUser ? {
+            id: selectedUser.id,
+            nama_lengkap: selectedUser.nama_lengkap,
+            no_hp: selectedUser.no_hp,
+            role: selectedUser.role,
+            is_active: selectedUser.is_active
+          } : null}
         />
       </div>
     </DashboardLayout>

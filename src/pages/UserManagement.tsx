@@ -39,14 +39,22 @@ export default function UserManagement() {
         .from('profiles')
         .select(`
           *,
-          tenants (
-            name
+          tenants!profiles_company_id_fkey (
+            name, nama_perusahaan
           )
         `)
         .order('name');
       
       if (error) throw error;
-      return data as Profile[];
+      return data.map(item => ({
+        ...item,
+        nama_lengkap: item.nama_lengkap || item.name,
+        no_hp: item.no_hp || item.phone,
+        tenants: item.tenants ? {
+          name: item.tenants.name || item.tenants.nama_perusahaan,
+          nama_perusahaan: item.tenants.nama_perusahaan || item.tenants.name
+        } : null
+      })) as Profile[];
     }
   });
 

@@ -82,11 +82,11 @@ export function EditMaintenanceModal({ open, onOpenChange, schedule }: EditMaint
         .from('profiles')
         .select(`
           user_id, 
-          name, 
+          nama_lengkap,
           role,
-          tenants(id, name, type)
+          tenants!profiles_company_id_fkey(id, nama_perusahaan, company_type)
         `)
-        .in('role', ['teknisi', 'teknisi_rs'])
+        .in('role', ['teknisi_mitra'])
         .eq('is_active', true);
       if (error) throw error;
       return data;
@@ -215,7 +215,7 @@ export function EditMaintenanceModal({ open, onOpenChange, schedule }: EditMaint
               <SelectContent>
                 {technicians.map((tech) => (
                   <SelectItem key={tech.user_id} value={tech.user_id}>
-                    {tech.name} - {tech.role === 'teknisi_rs' ? tech.tenants?.name : 'General'}
+                    {tech.nama_lengkap} - {tech.role === 'teknisi_mitra' ? tech.tenants?.nama_perusahaan : 'General'}
                   </SelectItem>
                 ))}
               </SelectContent>

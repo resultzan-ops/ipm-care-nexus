@@ -9,45 +9,36 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useQueryClient } from "@tanstack/react-query";
 
+interface Profile {
+  id: string;
+  nama_lengkap: string;
+  no_hp: string | null;
+  role: 'super_admin' | 'admin_mitra' | 'teknisi_mitra' | 'admin_klien' | 'operator_klien';
+  is_active: boolean;
+}
+
 interface EditUserModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  user: {
-    id: string;
-    name: string;
-    phone: string | null;
-    role: string;
-    is_active: boolean;
-  } | null;
+  user: Profile | null;
 }
 
-type AppRole =
-  | "teknisi"
-  | "operator"
-  | "super_admin"
-  | "spv"
-  | "admin_kalibrasi"
-  | "kalibrator"
-  | "admin_rs"
-  | "spv_rs"
-  | "operator_rs"
-  | "teknisi_rs"
-  | "admin_tenant";
+type AppRole = 'super_admin' | 'admin_mitra' | 'teknisi_mitra' | 'admin_klien' | 'operator_klien';
 
 export function EditUserModal({ open, onOpenChange, user }: EditUserModalProps) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const [name, setName] = useState("");
-  const [phone, setPhone] = useState<string>("");
-  const [role, setRole] = useState<AppRole>("teknisi");
+  const [namaLengkap, setNamaLengkap] = useState("");
+  const [noHp, setNoHp] = useState<string>("");
+  const [role, setRole] = useState<AppRole>("operator_klien");
   const [isActive, setIsActive] = useState(true);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     if (open && user) {
-      setName(user.name ?? "");
-      setPhone(user.phone ?? "");
-      setRole((user.role ?? "teknisi") as AppRole);
+      setNamaLengkap(user.nama_lengkap ?? "");
+      setNoHp(user.no_hp ?? "");
+      setRole(user.role);
       setIsActive(!!user.is_active);
     }
   }, [open, user]);
@@ -58,8 +49,8 @@ export function EditUserModal({ open, onOpenChange, user }: EditUserModalProps) 
     const { error } = await supabase
       .from("profiles")
       .update({
-        name,
-        phone: phone || null,
+        nama_lengkap: namaLengkap,
+        no_hp: noHp || null,
         role: role as any,
         is_active: isActive,
       })
@@ -85,12 +76,12 @@ export function EditUserModal({ open, onOpenChange, user }: EditUserModalProps) 
 
         <div className="space-y-4">
           <div className="grid gap-2">
-            <Label htmlFor="name">Nama</Label>
-            <Input id="name" value={name} onChange={(e) => setName(e.target.value)} />
+            <Label htmlFor="namaLengkap">Nama Lengkap</Label>
+            <Input id="namaLengkap" value={namaLengkap} onChange={(e) => setNamaLengkap(e.target.value)} />
           </div>
           <div className="grid gap-2">
-            <Label htmlFor="phone">Telepon</Label>
-            <Input id="phone" value={phone} onChange={(e) => setPhone(e.target.value)} />
+            <Label htmlFor="noHp">Nomor HP</Label>
+            <Input id="noHp" value={noHp} onChange={(e) => setNoHp(e.target.value)} />
           </div>
           <div className="grid gap-2">
             <Label>Peran</Label>
@@ -100,16 +91,10 @@ export function EditUserModal({ open, onOpenChange, user }: EditUserModalProps) 
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="super_admin">Super Admin</SelectItem>
-                <SelectItem value="admin_rs">Admin RS</SelectItem>
-                <SelectItem value="admin_tenant">Administrator</SelectItem>
-                <SelectItem value="operator">Operator</SelectItem>
-                <SelectItem value="operator_rs">Operator RS</SelectItem>
-                <SelectItem value="spv_rs">SPV RS</SelectItem>
-                <SelectItem value="kalibrator">Kalibrator</SelectItem>
-                <SelectItem value="admin_kalibrasi">Admin Kalibrasi</SelectItem>
-                <SelectItem value="teknisi">Teknisi</SelectItem>
-                <SelectItem value="teknisi_rs">Teknisi RS</SelectItem>
-                <SelectItem value="spv">SPV</SelectItem>
+                <SelectItem value="admin_mitra">Admin Mitra</SelectItem>
+                <SelectItem value="teknisi_mitra">Teknisi Mitra</SelectItem>
+                <SelectItem value="admin_klien">Admin Klien</SelectItem>
+                <SelectItem value="operator_klien">Operator Klien</SelectItem>
               </SelectContent>
             </Select>
           </div>

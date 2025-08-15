@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { DashboardLayout } from "@/components/dashboard/layout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -7,9 +8,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Users as UsersIcon, Plus, Search, Filter, Shield, User, Settings, Eye } from "lucide-react";
 import { Input } from "@/components/ui/input";
-import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
+import { AddUserModal } from "@/components/users/add-user-modal";
 
 interface Profile {
   id: string;
@@ -25,11 +27,13 @@ interface Profile {
 }
 
 export default function Users() {
-  const userRole = "owner";
+  const { profile } = useAuth();
+  const userRole = (profile?.role as "teknisi" | "operator" | "admin_tenant" | "admin_super" | "owner") || "teknisi";
   const tenantName = "RS Umum Daerah Bantul";
   const [roleFilter, setRoleFilter] = useState("all");
   const [statusFilter, setStatusFilter] = useState("all");
   const [searchTerm, setSearchTerm] = useState("");
+  const [addUserModalOpen, setAddUserModalOpen] = useState(false);
 
   // Fetch real user profiles from Supabase
   const { data: profiles = [], isLoading } = useQuery({
@@ -121,7 +125,7 @@ export default function Users() {
               Manage users and their roles within the system
             </p>
           </div>
-          <Button variant="medical" className="gap-2">
+          <Button variant="medical" className="gap-2" onClick={() => setAddUserModalOpen(true)}>
             <Plus className="h-4 w-4" />
             Add User
           </Button>
@@ -281,6 +285,11 @@ export default function Users() {
             )}
           </CardContent>
         </Card>
+        
+        <AddUserModal 
+          open={addUserModalOpen} 
+          onOpenChange={setAddUserModalOpen} 
+        />
       </div>
     </DashboardLayout>
   );

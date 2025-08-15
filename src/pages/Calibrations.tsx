@@ -4,10 +4,14 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Calendar, Plus, Search, Filter, CheckCircle, AlertTriangle, Clock, FileText } from "lucide-react";
+import { Calendar, Plus, Search, Filter, CheckCircle, AlertTriangle, Clock, FileText, Eye, SendHorizontal } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { useState } from "react";
+import { CalibrationRequestModal } from "@/components/calibration/calibration-request-modal";
+import { CertificateViewer } from "@/components/calibration/certificate-viewer";
+import { NotificationSystem } from "@/components/notifications/notification-system";
 
+// Enhanced mock calibration data with file information
 const mockCalibrations = [
   {
     id: "CAL-001",
@@ -19,7 +23,9 @@ const mockCalibrations = [
     status: "Valid",
     certificateNumber: "CERT-2023-001",
     calibratedBy: "PT. Kalibrasi Medis Indonesia",
-    validUntil: "2024-07-15"
+    validUntil: "2024-07-15",
+    fileUrl: "/sample-certificate.pdf",
+    fileType: "pdf" as const
   },
   {
     id: "CAL-002",
@@ -31,7 +37,9 @@ const mockCalibrations = [
     status: "Valid", 
     certificateNumber: "CERT-2023-002",
     calibratedBy: "Lab Kalibrasi Nasional",
-    validUntil: "2024-12-10"
+    validUntil: "2024-12-10",
+    fileUrl: "/sample-certificate-2.jpg",
+    fileType: "jpg" as const
   },
   {
     id: "CAL-003",
@@ -43,7 +51,9 @@ const mockCalibrations = [
     status: "Expiring Soon",
     certificateNumber: "CERT-2023-003",
     calibratedBy: "PT. Sertifikasi Alkes",
-    validUntil: "2024-03-20"
+    validUntil: "2024-03-20",
+    fileUrl: "/sample-certificate-3.png",
+    fileType: "png" as const
   },
   {
     id: "CAL-004",
@@ -55,7 +65,9 @@ const mockCalibrations = [
     status: "Expired",
     certificateNumber: "CERT-2022-004",
     calibratedBy: "Balai Kalibrasi Regional",
-    validUntil: "2023-11-15"
+    validUntil: "2023-11-15",
+    fileUrl: "/sample-certificate-4.pdf",
+    fileType: "pdf" as const
   }
 ];
 
@@ -64,6 +76,17 @@ export default function Calibrations() {
   const tenantName = "RS Umum Daerah Bantul";
   const [statusFilter, setStatusFilter] = useState("all");
   const [searchTerm, setSearchTerm] = useState("");
+  const [requestModalOpen, setRequestModalOpen] = useState(false);
+  const [certificateViewerOpen, setCertificateViewerOpen] = useState(false);
+  const [selectedCertificate, setSelectedCertificate] = useState<any>(null);
+
+  // Transform calibrations for equipment request list
+  const equipmentForRequest = mockCalibrations.map(cal => ({
+    id: cal.equipmentId,
+    nama_alat: cal.equipmentName,
+    nextCalibration: cal.nextCalibration,
+    status: cal.status as 'Valid' | 'Expiring Soon' | 'Expired'
+  }));
 
   const filteredCalibrations = mockCalibrations.filter(calibration => {
     const matchesStatus = statusFilter === "all" || calibration.status.toLowerCase().replace(/\s+/g, '') === statusFilter;
@@ -109,8 +132,24 @@ export default function Calibrations() {
     return diffDays;
   };
 
+  const handleViewCertificate = (calibration: any) => {
+    setSelectedCertificate({
+      id: calibration.id,
+      equipmentName: calibration.equipmentName,
+      certificateNumber: calibration.certificateNumber,
+      calibratedBy: calibration.calibratedBy,
+      calibrationDate: calibration.lastCalibration,
+      validUntil: calibration.validUntil,
+      status: calibration.status,
+      fileUrl: calibration.fileUrl,
+      fileType: calibration.fileType
+    });
+    setCertificateViewerOpen(true);
+  };
+
   return (
     <DashboardLayout userRole={userRole} tenantName={tenantName}>
+      <NotificationSystem />
       <div className="space-y-6">
         <div className="flex items-center justify-between">
           <div>
@@ -119,10 +158,16 @@ export default function Calibrations() {
               Manage calibration schedules and certificates
             </p>
           </div>
-          <Button variant="medical" className="gap-2">
-            <Plus className="h-4 w-4" />
-            Schedule Calibration
-          </Button>
+          <div className="flex gap-2">
+            <Button variant="outline" className="gap-2" onClick={() => setRequestModalOpen(true)}>
+              <SendHorizontal className="h-4 w-4" />
+              Request Calibration
+            </Button>
+            <Button variant="medical" className="gap-2">
+              <Plus className="h-4 w-4" />
+              Schedule Calibration
+            </Button>
+          </div>
         </div>
 
         {/* Statistics Cards */}
@@ -221,6 +266,7 @@ export default function Calibrations() {
                   <TableHead>Status</TableHead>
                   <TableHead>Certificate</TableHead>
                   <TableHead>Calibrated By</TableHead>
+                  <TableHead>Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -249,6 +295,17 @@ export default function Calibrations() {
                     <TableCell className="max-w-xs truncate" title={calibration.calibratedBy}>
                       {calibration.calibratedBy}
                     </TableCell>
+                    <TableCell>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleViewCertificate(calibration)}
+                        className="gap-1"
+                      >
+                        <Eye className="h-3 w-3" />
+                        View
+                      </Button>
+                    </TableCell>
                   </TableRow>
                 ))}
               </TableBody>
@@ -256,6 +313,19 @@ export default function Calibrations() {
           </CardContent>
         </Card>
       </div>
+
+      {/* Modals */}
+      <CalibrationRequestModal
+        isOpen={requestModalOpen}
+        onOpenChange={setRequestModalOpen}
+        equipmentList={equipmentForRequest}
+      />
+      
+      <CertificateViewer
+        isOpen={certificateViewerOpen}
+        onOpenChange={setCertificateViewerOpen}
+        certificate={selectedCertificate}
+      />
     </DashboardLayout>
   );
 }

@@ -1,11 +1,13 @@
 import { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { QrCode, Download, X } from "lucide-react";
+import { QrCode, Download, X, Printer } from "lucide-react";
+import { BarcodePrintModal } from "./barcode-print-modal";
 
 interface QRCodeModalProps {
   equipmentId: string;
   equipmentName: string;
+  equipmentSerial?: string;
   qrCode: string;
   isOpen: boolean;
   onOpenChange: (open: boolean) => void;
@@ -14,10 +16,12 @@ interface QRCodeModalProps {
 export function QRCodeModal({ 
   equipmentId, 
   equipmentName, 
+  equipmentSerial = "N/A",
   qrCode, 
   isOpen, 
   onOpenChange 
 }: QRCodeModalProps) {
+  const [printModalOpen, setPrintModalOpen] = useState(false);
   const generateQRCodeUrl = (text: string) => {
     // Using QR Server API to generate QR code
     const encodedText = encodeURIComponent(text);
@@ -78,17 +82,32 @@ export function QRCodeModal({
               className="flex-1"
             >
               <Download className="h-4 w-4 mr-2" />
-              Download QR
+              Download
+            </Button>
+            <Button 
+              variant="medical" 
+              onClick={() => setPrintModalOpen(true)}
+              className="flex-1"
+            >
+              <Printer className="h-4 w-4 mr-2" />
+              Print Label
             </Button>
             <Button 
               variant="outline" 
               onClick={() => onOpenChange(false)}
-              className="flex-1"
             >
-              <X className="h-4 w-4 mr-2" />
-              Close
+              <X className="h-4 w-4" />
             </Button>
           </div>
+        
+        <BarcodePrintModal
+          equipmentId={equipmentId}
+          equipmentName={equipmentName}
+          serialNumber={equipmentSerial}
+          qrCode={qrCode}
+          isOpen={printModalOpen}
+          onOpenChange={setPrintModalOpen}
+        />
         </div>
       </DialogContent>
     </Dialog>

@@ -260,6 +260,7 @@ export default function Equipment() {
         <QRCodeModal
           equipmentId={selectedEquipment.id}
           equipmentName={selectedEquipment.nama_alat}
+          equipmentSerial={selectedEquipment.nomor_seri}
           qrCode={selectedEquipment.qr_code}
           isOpen={qrModalOpen}
           onOpenChange={setQrModalOpen}

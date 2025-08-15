@@ -19,7 +19,8 @@ import {
   User,
   Pencil,
   Trash2,
-  Eye
+  Eye,
+  Building2
 } from "lucide-react";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
@@ -40,6 +41,8 @@ import {
 } from "@/components/ui/alert-dialog";
 import { AddMaintenanceModal } from "@/components/maintenance/add-maintenance-modal";
 import { EditMaintenanceModal } from "@/components/maintenance/edit-maintenance-modal";
+import { TechnicianDetailPopup } from "@/components/popups/technician-detail-popup";
+import { HospitalDetailPopup } from "@/components/popups/hospital-detail-popup";
 
 export default function Maintenance() {
   const { profile } = useAuth();
@@ -51,15 +54,51 @@ export default function Maintenance() {
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
   const [priorityFilter, setPriorityFilter] = useState("");
+  const [technicianFilter, setTechnicianFilter] = useState("");
+  const [hospitalFilter, setHospitalFilter] = useState("");
   const [selectedDate, setSelectedDate] = useState<Date>();
   const [addModalOpen, setAddModalOpen] = useState(false);
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [selectedSchedule, setSelectedSchedule] = useState<any>(null);
+  const [technicianPopupOpen, setTechnicianPopupOpen] = useState(false);
+  const [selectedTechnicianId, setSelectedTechnicianId] = useState<string | null>(null);
+  const [hospitalPopupOpen, setHospitalPopupOpen] = useState(false);
+  const [selectedHospitalId, setSelectedHospitalId] = useState<string | null>(null);
 
   // Check if user can manage schedules
   const canManage = ['super_admin', 'spv', 'spv_rs'].includes(userRole);
 
-  // Fetch PM schedules from Supabase
+  // Fetch technicians for filtering
+  const { data: technicians = [] } = useQuery({
+    queryKey: ['technicians-filter'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select(`
+          user_id, 
+          name, 
+          role,
+          tenants(id, name, type)
+        `)
+        .in('role', ['teknisi', 'teknisi_rs'])
+        .eq('is_active', true);
+      if (error) throw error;
+      return data;
+    }
+  });
+
+  // Fetch hospitals/companies for filtering
+  const { data: hospitals = [] } = useQuery({
+    queryKey: ['hospitals-filter'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('tenants')
+        .select('id, name, type')
+        .order('name');
+      if (error) throw error;
+      return data;
+    }
+  });
   const { data: pmSchedules = [], isLoading } = useQuery({
     queryKey: ['pm_schedules'],
     queryFn: async () => {
@@ -69,7 +108,8 @@ export default function Maintenance() {
           *,
           equipment(name, location),
           profiles!pm_schedules_assigned_to_fkey(name),
-          created_by_profile:profiles!pm_schedules_created_by_fkey(name)
+          created_by_profile:profiles!pm_schedules_created_by_fkey(name),
+          equipment!inner(tenants(id, name, type))
         `)
         .order('scheduled_date', { ascending: true });
       
@@ -82,13 +122,16 @@ export default function Maintenance() {
     const matchesSearch = 
       (item.equipment?.name?.toLowerCase().includes(searchTerm.toLowerCase()) || false) ||
       (item.profiles?.name?.toLowerCase().includes(searchTerm.toLowerCase()) || false) ||
-      (item.equipment?.location?.toLowerCase().includes(searchTerm.toLowerCase()) || false);
+      (item.equipment?.location?.toLowerCase().includes(searchTerm.toLowerCase()) || false) ||
+      (item.equipment?.tenants?.name?.toLowerCase().includes(searchTerm.toLowerCase()) || false);
     const matchesStatus = !statusFilter || statusFilter === "all" || item.status === statusFilter;
     const matchesPriority = !priorityFilter || priorityFilter === "all" || item.priority.toString() === priorityFilter;
+    const matchesTechnician = !technicianFilter || technicianFilter === "all" || item.assigned_to === technicianFilter;
+    const matchesHospital = !hospitalFilter || hospitalFilter === "all" || item.equipment?.tenants?.id === hospitalFilter;
     const matchesDate = !selectedDate || 
                        format(new Date(item.scheduled_date), 'yyyy-MM-dd') === format(selectedDate, 'yyyy-MM-dd');
     
-    return matchesSearch && matchesStatus && matchesPriority && matchesDate;
+    return matchesSearch && matchesStatus && matchesPriority && matchesTechnician && matchesHospital && matchesDate;
   });
 
   const deleteSchedule = async (id: string) => {
@@ -270,6 +313,34 @@ export default function Maintenance() {
                   <SelectItem value="1">Low</SelectItem>
                 </SelectContent>
               </Select>
+
+              <Select value={technicianFilter} onValueChange={setTechnicianFilter}>
+                <SelectTrigger className="w-40">
+                  <SelectValue placeholder="Filter by technician" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Technicians</SelectItem>
+                  {technicians.map((tech) => (
+                    <SelectItem key={tech.user_id} value={tech.user_id}>
+                      {tech.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+
+              <Select value={hospitalFilter} onValueChange={setHospitalFilter}>
+                <SelectTrigger className="w-40">
+                  <SelectValue placeholder="Filter by hospital" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Hospitals</SelectItem>
+                  {hospitals.map((hospital) => (
+                    <SelectItem key={hospital.id} value={hospital.id}>
+                      {hospital.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
               
               <Popover>
                 <PopoverTrigger asChild>
@@ -301,6 +372,8 @@ export default function Maintenance() {
                 setSearchTerm("");
                 setStatusFilter("all");
                 setPriorityFilter("all");
+                setTechnicianFilter("all");
+                setHospitalFilter("all");
                 setSelectedDate(undefined);
               }}
               >
@@ -333,39 +406,67 @@ export default function Maintenance() {
                         </Badge>
                       </div>
                       
-                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 text-sm">
-                        <div className="flex items-center gap-2">
-                          <CalendarDays className="h-4 w-4 text-muted-foreground" />
-                          <div>
-                            <p className="text-muted-foreground">Scheduled</p>
-                            <p className="font-medium">{format(new Date(item.scheduled_date), "PPP")}</p>
-                          </div>
-                        </div>
-                        
-                        <div className="flex items-center gap-2">
-                          <User className="h-4 w-4 text-muted-foreground" />
-                          <div>
-                            <p className="text-muted-foreground">Assigned To</p>
-                            <p className="font-medium">{item.profiles?.name || 'Unassigned'}</p>
-                          </div>
-                        </div>
-                        
-                        <div className="flex items-center gap-2">
-                          <Clock className="h-4 w-4 text-muted-foreground" />
-                          <div>
-                            <p className="text-muted-foreground">Frequency</p>
-                            <p className="font-medium">{item.frequency_months} months</p>
-                          </div>
-                        </div>
-                        
-                        <div className="flex items-center gap-2">
-                          <Wrench className="h-4 w-4 text-muted-foreground" />
-                          <div>
-                            <p className="text-muted-foreground">Created By</p>
-                            <p className="font-medium">{item.created_by_profile?.name || 'Unknown'}</p>
-                          </div>
-                        </div>
-                      </div>
+                       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 text-sm">
+                         <div className="flex items-center gap-2">
+                           <CalendarDays className="h-4 w-4 text-muted-foreground" />
+                           <div>
+                             <p className="text-muted-foreground">Scheduled</p>
+                             <p className="font-medium">{format(new Date(item.scheduled_date), "PPP")}</p>
+                           </div>
+                         </div>
+                         
+                         <div className="flex items-center gap-2">
+                           <User className="h-4 w-4 text-muted-foreground" />
+                           <div>
+                             <p className="text-muted-foreground">Assigned To</p>
+                             <button 
+                               className="font-medium text-primary hover:underline text-left"
+                               onClick={() => {
+                                 if (item.assigned_to) {
+                                   setSelectedTechnicianId(item.assigned_to);
+                                   setTechnicianPopupOpen(true);
+                                 }
+                               }}
+                             >
+                               {item.profiles?.name || 'Unassigned'}
+                             </button>
+                           </div>
+                         </div>
+
+                         <div className="flex items-center gap-2">
+                           <Building2 className="h-4 w-4 text-muted-foreground" />
+                           <div>
+                             <p className="text-muted-foreground">Hospital/Company</p>
+                             <button 
+                               className="font-medium text-primary hover:underline text-left"
+                               onClick={() => {
+                                 if (item.equipment?.tenants?.id) {
+                                   setSelectedHospitalId(item.equipment.tenants.id);
+                                   setHospitalPopupOpen(true);
+                                 }
+                               }}
+                             >
+                               {item.equipment?.tenants?.name || 'Unknown'}
+                             </button>
+                           </div>
+                         </div>
+                         
+                         <div className="flex items-center gap-2">
+                           <Clock className="h-4 w-4 text-muted-foreground" />
+                           <div>
+                             <p className="text-muted-foreground">Frequency</p>
+                             <p className="font-medium">{item.frequency_months} months</p>
+                           </div>
+                         </div>
+                         
+                         <div className="flex items-center gap-2">
+                           <Wrench className="h-4 w-4 text-muted-foreground" />
+                           <div>
+                             <p className="text-muted-foreground">Created By</p>
+                             <p className="font-medium">{item.created_by_profile?.name || 'Unknown'}</p>
+                           </div>
+                         </div>
+                       </div>
                       
                       <div className="text-sm text-muted-foreground">
                         Location: {item.equipment?.location || 'Unknown'} 
@@ -433,6 +534,8 @@ export default function Maintenance() {
               setSearchTerm("");
               setStatusFilter("all");
               setPriorityFilter("all");
+              setTechnicianFilter("all");
+              setHospitalFilter("all");
               setSelectedDate(undefined);
             }}>
               Clear Filters
@@ -448,6 +551,16 @@ export default function Maintenance() {
           open={editModalOpen}
           onOpenChange={setEditModalOpen}
           schedule={selectedSchedule}
+        />
+        <TechnicianDetailPopup
+          open={technicianPopupOpen}
+          onOpenChange={setTechnicianPopupOpen}
+          technicianId={selectedTechnicianId}
+        />
+        <HospitalDetailPopup
+          open={hospitalPopupOpen}
+          onOpenChange={setHospitalPopupOpen}
+          hospitalId={selectedHospitalId}
         />
       </div>
     </DashboardLayout>

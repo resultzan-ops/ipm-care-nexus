@@ -9,12 +9,27 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ArrowLeft, Upload, Save, QrCode } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 
 export default function AddEquipment() {
   const userRole = "owner";
   const tenantName = "RS Umum Daerah Bantul";
   const navigate = useNavigate();
   const { toast } = useToast();
+
+  // Fetch hospitals/companies for equipment form
+  const { data: hospitals = [] } = useQuery({
+    queryKey: ['hospitals'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('tenants')
+        .select('id, name, type')
+        .order('name');
+      if (error) throw error;
+      return data;
+    }
+  });
 
   const [formData, setFormData] = useState({
     nama_alat: "",
@@ -23,6 +38,7 @@ export default function AddEquipment() {
     merk: "",
     model: "",
     lokasi: undefined as string | undefined,
+    hospital_id: undefined as string | undefined,
     harga_peralatan: "",
     status: "Aktif",
     foto_peralatan: null as File | null
@@ -71,10 +87,10 @@ export default function AddEquipment() {
     e.preventDefault();
     
     // Basic validation
-    if (!formData.nama_alat || !formData.kategori || !formData.nomor_seri) {
+    if (!formData.nama_alat || !formData.kategori || !formData.nomor_seri || !formData.hospital_id) {
       toast({
         title: "Validation Error",
-        description: "Please fill in all required fields",
+        description: "Please fill in all required fields including hospital/company",
         variant: "destructive"
       });
       return;
@@ -191,6 +207,24 @@ export default function AddEquipment() {
                       />
                     </div>
                     <div className="space-y-2">
+                      <Label htmlFor="hospital_id">Hospital/Company *</Label>
+                      <Select value={formData.hospital_id} onValueChange={(value) => handleInputChange("hospital_id", value)}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select hospital/company" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {hospitals.map(hospital => (
+                            <SelectItem key={hospital.id} value={hospital.id}>
+                              {hospital.name} ({hospital.type})
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-2">
                       <Label htmlFor="lokasi">Location</Label>
                       <Select value={formData.lokasi} onValueChange={(value) => handleInputChange("lokasi", value)}>
                         <SelectTrigger>
@@ -202,8 +236,8 @@ export default function AddEquipment() {
                           ))}
                         </SelectContent>
                       </Select>
-                    </div>
-                  </div>
+                     </div>
+                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-2">

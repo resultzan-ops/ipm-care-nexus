@@ -56,26 +56,36 @@ export function EditMaintenanceModal({ open, onOpenChange, schedule }: EditMaint
     }
   }, [open, schedule]);
 
-  // Fetch equipment list
+  // Fetch equipment list with hospital/company info
   const { data: equipment = [] } = useQuery({
     queryKey: ['equipment'],
     queryFn: async () => {
       const { data, error } = await supabase
         .from('equipment')
-        .select('id, name, location')
+        .select(`
+          id, 
+          name, 
+          location,
+          tenants(id, name, type)
+        `)
         .eq('status', 'active');
       if (error) throw error;
       return data;
     }
   });
 
-  // Fetch technicians for assignment
+  // Fetch technicians for assignment with hospital/company info
   const { data: technicians = [] } = useQuery({
     queryKey: ['technicians'],
     queryFn: async () => {
       const { data, error } = await supabase
         .from('profiles')
-        .select('user_id, name')
+        .select(`
+          user_id, 
+          name, 
+          role,
+          tenants(id, name, type)
+        `)
         .in('role', ['teknisi', 'teknisi_rs'])
         .eq('is_active', true);
       if (error) throw error;
@@ -132,7 +142,7 @@ export function EditMaintenanceModal({ open, onOpenChange, schedule }: EditMaint
               <SelectContent>
                 {equipment.map((item) => (
                   <SelectItem key={item.id} value={item.id}>
-                    {item.name} - {item.location}
+                    {item.name} - {item.location} ({item.tenants?.name})
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -205,7 +215,7 @@ export function EditMaintenanceModal({ open, onOpenChange, schedule }: EditMaint
               <SelectContent>
                 {technicians.map((tech) => (
                   <SelectItem key={tech.user_id} value={tech.user_id}>
-                    {tech.name}
+                    {tech.name} - {tech.role === 'teknisi_rs' ? tech.tenants?.name : 'General'}
                   </SelectItem>
                 ))}
               </SelectContent>

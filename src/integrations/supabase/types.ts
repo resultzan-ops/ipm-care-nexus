@@ -28,6 +28,7 @@ export type Database = {
           next_due_date: string | null
           notes: string | null
           performed_by: string
+          provider_company_id: string | null
         }
         Insert: {
           calibration_date: string
@@ -42,6 +43,7 @@ export type Database = {
           next_due_date?: string | null
           notes?: string | null
           performed_by: string
+          provider_company_id?: string | null
         }
         Update: {
           calibration_date?: string
@@ -56,6 +58,7 @@ export type Database = {
           next_due_date?: string | null
           notes?: string | null
           performed_by?: string
+          provider_company_id?: string | null
         }
         Relationships: [
           {
@@ -79,12 +82,21 @@ export type Database = {
             referencedRelation: "profiles"
             referencedColumns: ["user_id"]
           },
+          {
+            foreignKeyName: "calibration_records_provider_company_id_fkey"
+            columns: ["provider_company_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
         ]
       }
       calibration_requests: {
         Row: {
           approved_at: string | null
           approved_by: string | null
+          assigned_provider_company_id: string | null
+          assigned_technician_id: string | null
           created_at: string
           equipment_id: string
           id: string
@@ -98,6 +110,8 @@ export type Database = {
         Insert: {
           approved_at?: string | null
           approved_by?: string | null
+          assigned_provider_company_id?: string | null
+          assigned_technician_id?: string | null
           created_at?: string
           equipment_id: string
           id?: string
@@ -111,6 +125,8 @@ export type Database = {
         Update: {
           approved_at?: string | null
           approved_by?: string | null
+          assigned_provider_company_id?: string | null
+          assigned_technician_id?: string | null
           created_at?: string
           equipment_id?: string
           id?: string
@@ -125,6 +141,20 @@ export type Database = {
           {
             foreignKeyName: "calibration_requests_approved_by_fkey"
             columns: ["approved_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "calibration_requests_assigned_provider_company_id_fkey"
+            columns: ["assigned_provider_company_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "calibration_requests_assigned_technician_id_fkey"
+            columns: ["assigned_technician_id"]
             isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["user_id"]
@@ -565,6 +595,15 @@ export type Database = {
       generate_barcode: {
         Args: Record<PropertyKey, never>
         Returns: string
+      }
+      get_calibration_technicians: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          company_id: string
+          company_name: string
+          nama_lengkap: string
+          user_id: string
+        }[]
       }
       has_role: {
         Args: {

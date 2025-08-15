@@ -484,42 +484,54 @@ export type Database = {
       tenants: {
         Row: {
           address: string | null
-          company_type: Database["public"]["Enums"]["company_type"] | null
+          alamat: string | null
+          company_type: Database["public"]["Enums"]["company_type"]
           contact: string | null
           created_at: string
+          description: string | null
           email: string | null
           id: string
+          logo_url: string | null
           nama_perusahaan: string
           name: string
           phone: string | null
           type: Database["public"]["Enums"]["tenant_type"]
           updated_at: string
+          whatsapp: string | null
         }
         Insert: {
           address?: string | null
-          company_type?: Database["public"]["Enums"]["company_type"] | null
+          alamat?: string | null
+          company_type: Database["public"]["Enums"]["company_type"]
           contact?: string | null
           created_at?: string
+          description?: string | null
           email?: string | null
           id?: string
+          logo_url?: string | null
           nama_perusahaan: string
           name: string
           phone?: string | null
           type: Database["public"]["Enums"]["tenant_type"]
           updated_at?: string
+          whatsapp?: string | null
         }
         Update: {
           address?: string | null
-          company_type?: Database["public"]["Enums"]["company_type"] | null
+          alamat?: string | null
+          company_type?: Database["public"]["Enums"]["company_type"]
           contact?: string | null
           created_at?: string
+          description?: string | null
           email?: string | null
           id?: string
+          logo_url?: string | null
           nama_perusahaan?: string
           name?: string
           phone?: string | null
           type?: Database["public"]["Enums"]["tenant_type"]
           updated_at?: string
+          whatsapp?: string | null
         }
         Relationships: []
       }
@@ -574,7 +586,10 @@ export type Database = {
         | "admin_klien"
         | "operator_klien"
       calibration_status: "pending" | "approved" | "rejected" | "completed"
-      company_type: "IPM" | "Mitra Kalibrasi" | "Rumah Sakit / Perusahaan"
+      company_type:
+        | "Mitra Penyedia (Kalibrasi)"
+        | "Mitra Penyedia (Barang & Jasa)"
+        | "Klien Rumah Sakit/Perusahaan"
       equipment_category_type: "medis" | "umum"
       equipment_status: "active" | "inactive" | "maintenance" | "retired"
       notification_channel: "email" | "whatsapp" | "in_app"
@@ -720,7 +735,11 @@ export const Constants = {
         "operator_klien",
       ],
       calibration_status: ["pending", "approved", "rejected", "completed"],
-      company_type: ["IPM", "Mitra Kalibrasi", "Rumah Sakit / Perusahaan"],
+      company_type: [
+        "Mitra Penyedia (Kalibrasi)",
+        "Mitra Penyedia (Barang & Jasa)",
+        "Klien Rumah Sakit/Perusahaan",
+      ],
       equipment_category_type: ["medis", "umum"],
       equipment_status: ["active", "inactive", "maintenance", "retired"],
       notification_channel: ["email", "whatsapp", "in_app"],

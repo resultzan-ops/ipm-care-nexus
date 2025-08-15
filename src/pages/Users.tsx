@@ -46,6 +46,7 @@ interface Profile {
 export default function Users() {
   const { profile } = useAuth();
   const [companyFilter, setCompanyFilter] = useState("all");
+  const [companyTypeFilter, setCompanyTypeFilter] = useState("all"); // Filter by company type
   const [roleFilter, setRoleFilter] = useState("all");
   const [statusFilter, setStatusFilter] = useState("all");
   const [searchTerm, setSearchTerm] = useState("");
@@ -91,10 +92,13 @@ export default function Users() {
       (statusFilter === "active" && user.is_active) ||
       (statusFilter === "inactive" && !user.is_active);
     const matchesCompany = companyFilter === "all" || user.company_id === companyFilter;
+    const matchesCompanyType = companyTypeFilter === "all" ||
+      (companyTypeFilter === "mitra" && (user.tenants?.company_type === "Mitra Kalibrasi" || user.tenants?.company_type === "IPM")) ||
+      (companyTypeFilter === "klien" && user.tenants?.company_type === "Rumah Sakit / Perusahaan");
     const matchesSearch = user.nama_lengkap.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          user.role.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          user.tenants?.nama_perusahaan?.toLowerCase().includes(searchTerm.toLowerCase());
-    return matchesRole && matchesStatus && matchesCompany && matchesSearch;
+    return matchesRole && matchesStatus && matchesCompany && matchesCompanyType && matchesSearch;
   });
 
   const getStatistics = () => {
@@ -103,7 +107,21 @@ export default function Users() {
     const operators = profiles.filter(p => p.role === 'operator_klien').length;
     const technicians = profiles.filter(p => p.role === 'teknisi_mitra').length;
     
-    return { total, admins, operators, technicians };
+    // Filter by company type
+    const mitraUsers = profiles.filter(p => 
+      p.tenants?.company_type === "Mitra Kalibrasi" || 
+      p.tenants?.company_type === "IPM" ||
+      p.role === "admin_mitra" || 
+      p.role === "teknisi_mitra"
+    ).length;
+    
+    const klienUsers = profiles.filter(p => 
+      p.tenants?.company_type === "Rumah Sakit / Perusahaan" ||
+      p.role === "admin_klien" || 
+      p.role === "operator_klien"
+    ).length;
+    
+    return { total, admins, operators, technicians, mitraUsers, klienUsers };
   };
 
   const stats = getStatistics();
@@ -213,7 +231,7 @@ export default function Users() {
         </div>
 
         {/* Statistics Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-6 gap-4">
           <Card>
             <CardContent className="p-6">
               <div className="flex items-center gap-2">
@@ -254,6 +272,28 @@ export default function Users() {
                 <div>
                   <p className="text-2xl font-bold">{stats.technicians}</p>
                   <p className="text-sm text-muted-foreground">Technicians</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="p-6">
+              <div className="flex items-center gap-2">
+                <Shield className="h-8 w-8 text-orange-600" />
+                <div>
+                  <p className="text-2xl font-bold">{stats.mitraUsers}</p>
+                  <p className="text-sm text-muted-foreground">Mitra Users</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="p-6">
+              <div className="flex items-center gap-2">
+                <User className="h-8 w-8 text-green-600" />
+                <div>
+                  <p className="text-2xl font-bold">{stats.klienUsers}</p>
+                  <p className="text-sm text-muted-foreground">Klien Users</p>
                 </div>
               </div>
             </CardContent>
@@ -299,6 +339,17 @@ export default function Users() {
                       {company.nama_perusahaan}
                     </SelectItem>
                   ))}
+                </SelectContent>
+              </Select>
+              <Select value={companyTypeFilter} onValueChange={setCompanyTypeFilter}>
+                <SelectTrigger className="w-48">
+                  <Filter className="h-4 w-4 mr-2" />
+                  <SelectValue placeholder="Filter by type" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Types</SelectItem>
+                  <SelectItem value="mitra">Mitra (IPM & Kalibrasi)</SelectItem>
+                  <SelectItem value="klien">Klien (Rumah Sakit)</SelectItem>
                 </SelectContent>
               </Select>
               <Select value={statusFilter} onValueChange={setStatusFilter}>

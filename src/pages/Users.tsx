@@ -251,7 +251,13 @@ export default function Users() {
                         </Avatar>
                         <div>
                           <div className="font-medium">{user.name}</div>
-                          <div className="text-sm text-muted-foreground">{user.email}</div>
+                          <div className="text-sm text-muted-foreground">
+                            {user.role === 'admin_tenant' ? 'Administrator' : 
+                             user.role === 'operator' ? 'Operator' : 
+                             user.role === 'teknisi' ? 'Teknisi' : 
+                             user.role === 'super_admin' ? 'Super Admin' : 
+                             user.role}
+                          </div>
                         </div>
                       </div>
                     </TableCell>

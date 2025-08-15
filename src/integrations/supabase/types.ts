@@ -421,10 +421,13 @@ export type Database = {
       profiles: {
         Row: {
           avatar_url: string | null
+          company_id: string | null
           created_at: string
           id: string
           is_active: boolean
+          nama_lengkap: string
           name: string
+          no_hp: string | null
           phone: string | null
           role: Database["public"]["Enums"]["app_role"]
           tenant_id: string | null
@@ -433,22 +436,28 @@ export type Database = {
         }
         Insert: {
           avatar_url?: string | null
+          company_id?: string | null
           created_at?: string
           id?: string
           is_active?: boolean
+          nama_lengkap: string
           name: string
+          no_hp?: string | null
           phone?: string | null
-          role?: Database["public"]["Enums"]["app_role"]
+          role: Database["public"]["Enums"]["app_role"]
           tenant_id?: string | null
           updated_at?: string
           user_id: string
         }
         Update: {
           avatar_url?: string | null
+          company_id?: string | null
           created_at?: string
           id?: string
           is_active?: boolean
+          nama_lengkap?: string
           name?: string
+          no_hp?: string | null
           phone?: string | null
           role?: Database["public"]["Enums"]["app_role"]
           tenant_id?: string | null
@@ -456,6 +465,13 @@ export type Database = {
           user_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "profiles_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "profiles_tenant_id_fkey"
             columns: ["tenant_id"]
@@ -468,10 +484,12 @@ export type Database = {
       tenants: {
         Row: {
           address: string | null
+          company_type: Database["public"]["Enums"]["company_type"] | null
           contact: string | null
           created_at: string
           email: string | null
           id: string
+          nama_perusahaan: string
           name: string
           phone: string | null
           type: Database["public"]["Enums"]["tenant_type"]
@@ -479,10 +497,12 @@ export type Database = {
         }
         Insert: {
           address?: string | null
+          company_type?: Database["public"]["Enums"]["company_type"] | null
           contact?: string | null
           created_at?: string
           email?: string | null
           id?: string
+          nama_perusahaan: string
           name: string
           phone?: string | null
           type: Database["public"]["Enums"]["tenant_type"]
@@ -490,10 +510,12 @@ export type Database = {
         }
         Update: {
           address?: string | null
+          company_type?: Database["public"]["Enums"]["company_type"] | null
           contact?: string | null
           created_at?: string
           email?: string | null
           id?: string
+          nama_perusahaan?: string
           name?: string
           phone?: string | null
           type?: Database["public"]["Enums"]["tenant_type"]
@@ -521,16 +543,12 @@ export type Database = {
     Enums: {
       app_role:
         | "super_admin"
-        | "spv"
-        | "operator"
-        | "teknisi"
-        | "admin_kalibrasi"
-        | "kalibrator"
-        | "admin_rs"
-        | "spv_rs"
-        | "operator_rs"
-        | "teknisi_rs"
+        | "admin_mitra"
+        | "teknisi_mitra"
+        | "admin_klien"
+        | "operator_klien"
       calibration_status: "pending" | "approved" | "rejected" | "completed"
+      company_type: "IPM" | "Mitra Kalibrasi" | "Rumah Sakit / Perusahaan"
       equipment_category_type: "medis" | "umum"
       equipment_status: "active" | "inactive" | "maintenance" | "retired"
       notification_channel: "email" | "whatsapp" | "in_app"
@@ -670,17 +688,13 @@ export const Constants = {
     Enums: {
       app_role: [
         "super_admin",
-        "spv",
-        "operator",
-        "teknisi",
-        "admin_kalibrasi",
-        "kalibrator",
-        "admin_rs",
-        "spv_rs",
-        "operator_rs",
-        "teknisi_rs",
+        "admin_mitra",
+        "teknisi_mitra",
+        "admin_klien",
+        "operator_klien",
       ],
       calibration_status: ["pending", "approved", "rejected", "completed"],
+      company_type: ["IPM", "Mitra Kalibrasi", "Rumah Sakit / Perusahaan"],
       equipment_category_type: ["medis", "umum"],
       equipment_status: ["active", "inactive", "maintenance", "retired"],
       notification_channel: ["email", "whatsapp", "in_app"],

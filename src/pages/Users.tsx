@@ -81,6 +81,13 @@ export default function Users() {
             Super Admin
           </Badge>
         );
+      case "admin_rs":
+        return (
+          <Badge variant="default" className="gap-1">
+            <Shield className="h-3 w-3" />
+            Admin RS
+          </Badge>
+        );
       case "admin_tenant":
         return (
           <Badge variant="default" className="gap-1">
@@ -93,6 +100,13 @@ export default function Users() {
           <Badge variant="outline" className="gap-1">
             <User className="h-3 w-3" />
             Operator
+          </Badge>
+        );
+      case "kalibrator":
+        return (
+          <Badge variant="secondary" className="gap-1">
+            <Settings className="h-3 w-3" />
+            Kalibrator
           </Badge>
         );
       case "teknisi":
@@ -200,9 +214,11 @@ export default function Users() {
                 <SelectContent>
                   <SelectItem value="all">All Roles</SelectItem>
                   <SelectItem value="super_admin">Super Admin</SelectItem>
+                  <SelectItem value="admin_rs">Admin RS</SelectItem>
                   <SelectItem value="admin_tenant">Administrator</SelectItem>
                   <SelectItem value="operator">Operator</SelectItem>
-                  <SelectItem value="teknisi">Technician</SelectItem>
+                  <SelectItem value="kalibrator">Kalibrator</SelectItem>
+                  <SelectItem value="teknisi">Teknisi</SelectItem>
                 </SelectContent>
               </Select>
               <Select value={statusFilter} onValueChange={setStatusFilter}>
@@ -260,7 +276,9 @@ export default function Users() {
                             <div className="font-medium">{user.name}</div>
                             <div className="text-sm text-muted-foreground">
                               {user.role === 'admin_tenant' ? 'Administrator' : 
+                               user.role === 'admin_rs' ? 'Admin RS' : 
                                user.role === 'operator' ? 'Operator' : 
+                               user.role === 'kalibrator' ? 'Kalibrator' : 
                                user.role === 'teknisi' ? 'Teknisi' : 
                                user.role === 'super_admin' ? 'Super Admin' : 
                                user.role}

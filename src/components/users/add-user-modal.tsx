@@ -152,9 +152,11 @@ export function AddUserModal({ open, onOpenChange }: AddUserModalProps) {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="super_admin">Super Admin</SelectItem>
+                <SelectItem value="admin_rs">Admin RS</SelectItem>
                 <SelectItem value="admin_tenant">Administrator</SelectItem>
                 <SelectItem value="operator">Operator</SelectItem>
-                <SelectItem value="teknisi">Technician</SelectItem>
+                <SelectItem value="kalibrator">Kalibrator</SelectItem>
+                <SelectItem value="teknisi">Teknisi</SelectItem>
               </SelectContent>
             </Select>
           </div>

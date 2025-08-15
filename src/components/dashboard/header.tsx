@@ -16,8 +16,10 @@ interface HeaderProps {
 
 const roleLabels = {
   super_admin: "Super Admin",
+  admin_rs: "Admin RS",
   admin_tenant: "Hospital Administrator", 
   operator: "Equipment Operator",
+  kalibrator: "Kalibrator",
   teknisi: "Maintenance Technician",
   owner: "Hospital Owner",
 };

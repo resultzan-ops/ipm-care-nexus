@@ -6,12 +6,25 @@ import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"; 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Users as UsersIcon, Plus, Search, Filter, Shield, User, Settings, Eye } from "lucide-react";
+import { Users as UsersIcon, Plus, Search, Filter, Shield, User, Settings, Eye, Pencil, Trash2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { AddUserModal } from "@/components/users/add-user-modal";
+import { useToast } from "@/components/ui/use-toast";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+import { EditUserModal } from "@/components/users/edit-user-modal";
 
 interface Profile {
   id: string;
@@ -34,6 +47,10 @@ export default function Users() {
   const [statusFilter, setStatusFilter] = useState("all");
   const [searchTerm, setSearchTerm] = useState("");
   const [addUserModalOpen, setAddUserModalOpen] = useState(false);
+  const [editUserModalOpen, setEditUserModalOpen] = useState(false);
+  const [selectedUser, setSelectedUser] = useState<Profile | null>(null);
+  const queryClient = useQueryClient();
+  const { toast } = useToast();
 
   // Fetch real user profiles from Supabase
   const { data: profiles = [], isLoading } = useQuery({
@@ -127,6 +144,15 @@ export default function Users() {
         {isActive ? "Active" : "Inactive"}
       </Badge>
     );
+  };
+  const deleteProfile = async (id: string) => {
+    const { error } = await supabase.from('profiles').delete().eq('id', id);
+    if (error) {
+      toast({ title: 'Gagal menghapus', description: error.message });
+    } else {
+      toast({ title: 'User terhapus' });
+      queryClient.invalidateQueries({ queryKey: ['profiles'] });
+    }
   };
 
   return (
@@ -291,10 +317,48 @@ export default function Users() {
                       <TableCell>{getStatusBadge(user.is_active)}</TableCell>
                       <TableCell className="text-sm">{user.phone || 'N/A'}</TableCell>
                       <TableCell>
-                        <Button variant="ghost" size="sm" className="gap-1">
-                          <Eye className="h-3 w-3" />
-                          View
-                        </Button>
+                        <div className="flex items-center gap-1">
+                          <Button variant="ghost" size="sm" className="gap-1">
+                            <Eye className="h-3 w-3" />
+                            View
+                          </Button>
+                          {profile?.role === 'super_admin' && (
+                            <>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                className="gap-1"
+                                onClick={() => {
+                                  setSelectedUser(user as Profile);
+                                  setEditUserModalOpen(true);
+                                }}
+                              >
+                                <Pencil className="h-3 w-3" />
+                                Edit
+                              </Button>
+                              <AlertDialog>
+                                <AlertDialogTrigger asChild>
+                                  <Button variant="ghost" size="sm" className="gap-1 text-destructive">
+                                    <Trash2 className="h-3 w-3" />
+                                    Delete
+                                  </Button>
+                                </AlertDialogTrigger>
+                                <AlertDialogContent>
+                                  <AlertDialogHeader>
+                                    <AlertDialogTitle>Hapus user ini?</AlertDialogTitle>
+                                    <AlertDialogDescription>
+                                      Tindakan ini tidak dapat dibatalkan. User akan dihapus permanen.
+                                    </AlertDialogDescription>
+                                  </AlertDialogHeader>
+                                  <AlertDialogFooter>
+                                    <AlertDialogCancel>Batal</AlertDialogCancel>
+                                    <AlertDialogAction onClick={() => deleteProfile(user.id)}>Hapus</AlertDialogAction>
+                                  </AlertDialogFooter>
+                                </AlertDialogContent>
+                              </AlertDialog>
+                            </>
+                          )}
+                        </div>
                       </TableCell>
                     </TableRow>
                   ))}
@@ -307,6 +371,11 @@ export default function Users() {
         <AddUserModal 
           open={addUserModalOpen} 
           onOpenChange={setAddUserModalOpen} 
+        />
+        <EditUserModal
+          open={editUserModalOpen}
+          onOpenChange={setEditUserModalOpen}
+          user={selectedUser}
         />
       </div>
     </DashboardLayout>

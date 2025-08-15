@@ -15,7 +15,7 @@ interface HeaderProps {
 }
 
 const roleLabels = {
-  admin_super: "Super Administrator",
+  super_admin: "Super Admin",
   admin_tenant: "Hospital Administrator", 
   operator: "Equipment Operator",
   teknisi: "Maintenance Technician",
@@ -28,6 +28,10 @@ export function Header({ tenantName, userRole }: HeaderProps) {
   const handleSignOut = async () => {
     await signOut();
   };
+
+  // Use the actual role from profile, fallback to userRole prop
+  const actualRole = profile?.role || userRole;
+  const displayRole = roleLabels[actualRole as keyof typeof roleLabels] || actualRole;
 
   return (
     <header className="h-16 bg-card border-b border-border flex items-center justify-between px-6">
@@ -47,7 +51,7 @@ export function Header({ tenantName, userRole }: HeaderProps) {
         <div className="flex items-center space-x-3 pl-4 border-l border-border">
           <div className="text-right">
             <p className="text-sm font-medium">{profile?.name || 'User'}</p>
-            <p className="text-xs text-muted-foreground">{roleLabels[userRole]}</p>
+            <p className="text-xs text-muted-foreground">{displayRole}</p>
           </div>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>

@@ -546,6 +546,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      current_user_company_id: {
+        Args: Record<PropertyKey, never>
+        Returns: string
+      }
       generate_barcode: {
         Args: Record<PropertyKey, never>
         Returns: string

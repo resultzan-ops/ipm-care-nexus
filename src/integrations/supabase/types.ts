@@ -14,16 +14,526 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      calibration_records: {
+        Row: {
+          calibration_date: string
+          calibration_request_id: string | null
+          calibration_result: string | null
+          certificate_file_url: string | null
+          certificate_number: string | null
+          created_at: string
+          equipment_id: string
+          id: string
+          is_passed: boolean | null
+          next_due_date: string | null
+          notes: string | null
+          performed_by: string
+        }
+        Insert: {
+          calibration_date: string
+          calibration_request_id?: string | null
+          calibration_result?: string | null
+          certificate_file_url?: string | null
+          certificate_number?: string | null
+          created_at?: string
+          equipment_id: string
+          id?: string
+          is_passed?: boolean | null
+          next_due_date?: string | null
+          notes?: string | null
+          performed_by: string
+        }
+        Update: {
+          calibration_date?: string
+          calibration_request_id?: string | null
+          calibration_result?: string | null
+          certificate_file_url?: string | null
+          certificate_number?: string | null
+          created_at?: string
+          equipment_id?: string
+          id?: string
+          is_passed?: boolean | null
+          next_due_date?: string | null
+          notes?: string | null
+          performed_by?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "calibration_records_calibration_request_id_fkey"
+            columns: ["calibration_request_id"]
+            isOneToOne: false
+            referencedRelation: "calibration_requests"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "calibration_records_equipment_id_fkey"
+            columns: ["equipment_id"]
+            isOneToOne: false
+            referencedRelation: "equipment"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "calibration_records_performed_by_fkey"
+            columns: ["performed_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["user_id"]
+          },
+        ]
+      }
+      calibration_requests: {
+        Row: {
+          approved_at: string | null
+          approved_by: string | null
+          created_at: string
+          equipment_id: string
+          id: string
+          notes: string | null
+          priority: number | null
+          request_date: string
+          requested_by: string
+          status: Database["public"]["Enums"]["calibration_status"]
+          updated_at: string
+        }
+        Insert: {
+          approved_at?: string | null
+          approved_by?: string | null
+          created_at?: string
+          equipment_id: string
+          id?: string
+          notes?: string | null
+          priority?: number | null
+          request_date?: string
+          requested_by: string
+          status?: Database["public"]["Enums"]["calibration_status"]
+          updated_at?: string
+        }
+        Update: {
+          approved_at?: string | null
+          approved_by?: string | null
+          created_at?: string
+          equipment_id?: string
+          id?: string
+          notes?: string | null
+          priority?: number | null
+          request_date?: string
+          requested_by?: string
+          status?: Database["public"]["Enums"]["calibration_status"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "calibration_requests_approved_by_fkey"
+            columns: ["approved_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "calibration_requests_equipment_id_fkey"
+            columns: ["equipment_id"]
+            isOneToOne: false
+            referencedRelation: "equipment"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "calibration_requests_requested_by_fkey"
+            columns: ["requested_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["user_id"]
+          },
+        ]
+      }
+      categories: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          name: string
+          type: Database["public"]["Enums"]["equipment_category_type"]
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          name: string
+          type: Database["public"]["Enums"]["equipment_category_type"]
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          name?: string
+          type?: Database["public"]["Enums"]["equipment_category_type"]
+        }
+        Relationships: []
+      }
+      equipment: {
+        Row: {
+          barcode: string
+          brand: string | null
+          category_id: string | null
+          created_at: string
+          hospital_name: string | null
+          id: string
+          location: string | null
+          model: string | null
+          name: string
+          photo_url: string | null
+          price: number | null
+          purchase_date: string | null
+          serial_number: string
+          specifications: Json | null
+          status: Database["public"]["Enums"]["equipment_status"]
+          tenant_id: string
+          updated_at: string
+          warranty_date: string | null
+        }
+        Insert: {
+          barcode: string
+          brand?: string | null
+          category_id?: string | null
+          created_at?: string
+          hospital_name?: string | null
+          id?: string
+          location?: string | null
+          model?: string | null
+          name: string
+          photo_url?: string | null
+          price?: number | null
+          purchase_date?: string | null
+          serial_number: string
+          specifications?: Json | null
+          status?: Database["public"]["Enums"]["equipment_status"]
+          tenant_id: string
+          updated_at?: string
+          warranty_date?: string | null
+        }
+        Update: {
+          barcode?: string
+          brand?: string | null
+          category_id?: string | null
+          created_at?: string
+          hospital_name?: string | null
+          id?: string
+          location?: string | null
+          model?: string | null
+          name?: string
+          photo_url?: string | null
+          price?: number | null
+          purchase_date?: string | null
+          serial_number?: string
+          specifications?: Json | null
+          status?: Database["public"]["Enums"]["equipment_status"]
+          tenant_id?: string
+          updated_at?: string
+          warranty_date?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "equipment_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "categories"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "equipment_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      notifications: {
+        Row: {
+          channel: Database["public"]["Enums"]["notification_channel"]
+          created_at: string
+          data: Json | null
+          id: string
+          is_read: boolean
+          message: string
+          sent_at: string
+          title: string
+          type: string
+          user_id: string
+        }
+        Insert: {
+          channel?: Database["public"]["Enums"]["notification_channel"]
+          created_at?: string
+          data?: Json | null
+          id?: string
+          is_read?: boolean
+          message: string
+          sent_at?: string
+          title: string
+          type: string
+          user_id: string
+        }
+        Update: {
+          channel?: Database["public"]["Enums"]["notification_channel"]
+          created_at?: string
+          data?: Json | null
+          id?: string
+          is_read?: boolean
+          message?: string
+          sent_at?: string
+          title?: string
+          type?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notifications_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["user_id"]
+          },
+        ]
+      }
+      pm_records: {
+        Row: {
+          condition_after: string | null
+          condition_before: string | null
+          created_at: string
+          date_performed: string
+          findings: string | null
+          id: string
+          next_maintenance_date: string | null
+          parts_replaced: Json | null
+          performed_by: string
+          photos: Json | null
+          pm_schedule_id: string
+          recommendations: string | null
+        }
+        Insert: {
+          condition_after?: string | null
+          condition_before?: string | null
+          created_at?: string
+          date_performed?: string
+          findings?: string | null
+          id?: string
+          next_maintenance_date?: string | null
+          parts_replaced?: Json | null
+          performed_by: string
+          photos?: Json | null
+          pm_schedule_id: string
+          recommendations?: string | null
+        }
+        Update: {
+          condition_after?: string | null
+          condition_before?: string | null
+          created_at?: string
+          date_performed?: string
+          findings?: string | null
+          id?: string
+          next_maintenance_date?: string | null
+          parts_replaced?: Json | null
+          performed_by?: string
+          photos?: Json | null
+          pm_schedule_id?: string
+          recommendations?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pm_records_performed_by_fkey"
+            columns: ["performed_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "pm_records_pm_schedule_id_fkey"
+            columns: ["pm_schedule_id"]
+            isOneToOne: false
+            referencedRelation: "pm_schedules"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      pm_schedules: {
+        Row: {
+          assigned_to: string | null
+          created_at: string
+          created_by: string
+          equipment_id: string
+          frequency_months: number
+          id: string
+          notes: string | null
+          priority: number | null
+          scheduled_date: string
+          status: Database["public"]["Enums"]["pm_status"]
+          updated_at: string
+        }
+        Insert: {
+          assigned_to?: string | null
+          created_at?: string
+          created_by: string
+          equipment_id: string
+          frequency_months?: number
+          id?: string
+          notes?: string | null
+          priority?: number | null
+          scheduled_date: string
+          status?: Database["public"]["Enums"]["pm_status"]
+          updated_at?: string
+        }
+        Update: {
+          assigned_to?: string | null
+          created_at?: string
+          created_by?: string
+          equipment_id?: string
+          frequency_months?: number
+          id?: string
+          notes?: string | null
+          priority?: number | null
+          scheduled_date?: string
+          status?: Database["public"]["Enums"]["pm_status"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pm_schedules_assigned_to_fkey"
+            columns: ["assigned_to"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "pm_schedules_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "pm_schedules_equipment_id_fkey"
+            columns: ["equipment_id"]
+            isOneToOne: false
+            referencedRelation: "equipment"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          created_at: string
+          id: string
+          is_active: boolean
+          name: string
+          phone: string | null
+          role: Database["public"]["Enums"]["app_role"]
+          tenant_id: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          name: string
+          phone?: string | null
+          role?: Database["public"]["Enums"]["app_role"]
+          tenant_id?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          avatar_url?: string | null
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          name?: string
+          phone?: string | null
+          role?: Database["public"]["Enums"]["app_role"]
+          tenant_id?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "profiles_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tenants: {
+        Row: {
+          address: string | null
+          contact: string | null
+          created_at: string
+          email: string | null
+          id: string
+          name: string
+          phone: string | null
+          type: Database["public"]["Enums"]["tenant_type"]
+          updated_at: string
+        }
+        Insert: {
+          address?: string | null
+          contact?: string | null
+          created_at?: string
+          email?: string | null
+          id?: string
+          name: string
+          phone?: string | null
+          type: Database["public"]["Enums"]["tenant_type"]
+          updated_at?: string
+        }
+        Update: {
+          address?: string | null
+          contact?: string | null
+          created_at?: string
+          email?: string | null
+          id?: string
+          name?: string
+          phone?: string | null
+          type?: Database["public"]["Enums"]["tenant_type"]
+          updated_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      generate_barcode: {
+        Args: Record<PropertyKey, never>
+        Returns: string
+      }
     }
     Enums: {
-      [_ in never]: never
+      app_role:
+        | "super_admin"
+        | "spv"
+        | "operator"
+        | "teknisi"
+        | "admin_kalibrasi"
+        | "kalibrator"
+        | "admin_rs"
+        | "spv_rs"
+        | "operator_rs"
+        | "teknisi_rs"
+      calibration_status: "pending" | "approved" | "rejected" | "completed"
+      equipment_category_type: "medis" | "umum"
+      equipment_status: "active" | "inactive" | "maintenance" | "retired"
+      notification_channel: "email" | "whatsapp" | "in_app"
+      pm_status:
+        | "pending"
+        | "in_progress"
+        | "completed"
+        | "overdue"
+        | "cancelled"
+      tenant_type: "rumah_sakit" | "perusahaan"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +660,31 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: [
+        "super_admin",
+        "spv",
+        "operator",
+        "teknisi",
+        "admin_kalibrasi",
+        "kalibrator",
+        "admin_rs",
+        "spv_rs",
+        "operator_rs",
+        "teknisi_rs",
+      ],
+      calibration_status: ["pending", "approved", "rejected", "completed"],
+      equipment_category_type: ["medis", "umum"],
+      equipment_status: ["active", "inactive", "maintenance", "retired"],
+      notification_channel: ["email", "whatsapp", "in_app"],
+      pm_status: [
+        "pending",
+        "in_progress",
+        "completed",
+        "overdue",
+        "cancelled",
+      ],
+      tenant_type: ["rumah_sakit", "perusahaan"],
+    },
   },
 } as const

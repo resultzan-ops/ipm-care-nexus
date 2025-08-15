@@ -23,6 +23,7 @@ import Reports from "./pages/Reports";
 import Users from "./pages/Users";
 import UserManagement from "./pages/UserManagement";
 import Settings from "./pages/Settings";
+import PromoteSuperAdmin from "./pages/PromoteSuperAdmin";
 
 const App = () => {
   // Create QueryClient inside component to avoid SSR issues
@@ -58,6 +59,7 @@ const App = () => {
             <Route path="/users" element={<ProtectedRoute><Users /></ProtectedRoute>} />
             <Route path="/user-management" element={<ProtectedRoute><UserManagement /></ProtectedRoute>} />
             <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
+            <Route path="/promote-super-admin" element={<ProtectedRoute><PromoteSuperAdmin /></ProtectedRoute>} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>

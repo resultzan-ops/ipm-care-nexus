@@ -21,25 +21,30 @@ export default function PromoteSuperAdmin() {
     setLoading(true);
     
     try {
-      // First try to update using RPC or direct admin update
-      const { error } = await supabase.rpc('promote_to_super_admin', {
-        target_user_id: user.id
+      console.log('Promoting user:', { id: user.id, email: user.email });
+      
+      // Call edge function for promotion
+      const { data, error } = await supabase.functions.invoke('promote-super-admin', {
+        body: { 
+          user_id: user.id, 
+          email: user.email 
+        }
       });
 
-      if (error) {
-        // Fallback: direct update (might fail due to RLS)
-        const { error: updateError } = await supabase
-          .from("profiles")
-          .update({ role: "super_admin" as any })
-          .eq("user_id", user.id);
-        
-        if (updateError) throw updateError;
-      }
+      console.log('Promotion response:', { data, error });
+
+      if (error) throw new Error(error.message || 'Failed to promote user');
+      if (!data?.success) throw new Error(data?.error || 'Promotion failed');
 
       toast({ title: "Berhasil", description: "Akun Anda sekarang super_admin" });
-      // Force refresh auth state
-      window.location.reload();
+      
+      // Force refresh auth state after delay
+      setTimeout(() => {
+        window.location.href = '/users';
+      }, 2000);
+      
     } catch (error: any) {
+      console.error('Promotion error:', error);
       toast({ 
         title: "Gagal mempromosikan", 
         description: `Error: ${error.message}`,

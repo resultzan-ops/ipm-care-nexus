@@ -6,7 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
 import { useQueryClient } from "@tanstack/react-query";
 
 interface EditUserModalProps {
@@ -47,7 +47,7 @@ export function EditUserModal({ open, onOpenChange, user }: EditUserModalProps) 
     if (open && user) {
       setName(user.name ?? "");
       setPhone(user.phone ?? "");
-      setRole(user.role ?? "teknisi");
+      setRole((user.role ?? "teknisi") as AppRole);
       setIsActive(!!user.is_active);
     }
   }, [open, user]);
@@ -94,7 +94,7 @@ export function EditUserModal({ open, onOpenChange, user }: EditUserModalProps) 
           </div>
           <div className="grid gap-2">
             <Label>Peran</Label>
-            <Select value={role} onValueChange={setRole}>
+            <Select value={role} onValueChange={(value) => setRole(value as AppRole)}>
               <SelectTrigger>
                 <SelectValue placeholder="Pilih peran" />
               </SelectTrigger>

@@ -30,13 +30,25 @@ export function AddUserModal({ open, onOpenChange }: AddUserModalProps) {
       role: string;
       phone?: string;
     }) => {
-      // Call the create-user edge function
-      const { data, error } = await supabase.functions.invoke('create-user', {
-        body: userData
-      });
+      console.log('Attempting to call create-user function with data:', userData);
+      
+      try {
+        // Call the create-user edge function
+        const { data, error } = await supabase.functions.invoke('create-user', {
+          body: userData
+        });
 
-      if (error) throw error;
-      return data;
+        console.log('Edge function response:', { data, error });
+
+        if (error) {
+          console.error('Edge function error:', error);
+          throw error;
+        }
+        return data;
+      } catch (err) {
+        console.error('Failed to call edge function:', err);
+        throw err;
+      }
     },
     onSuccess: () => {
       toast({

@@ -108,8 +108,8 @@ export default function Equipment() {
     const matchesSearch = equipment.nama_alat.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          equipment.merk.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          equipment.nomor_seri.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesCategory = !categoryFilter || equipment.kategori === categoryFilter;
-    const matchesStatus = !statusFilter || equipment.status === statusFilter;
+    const matchesCategory = !categoryFilter || categoryFilter === "all" || equipment.kategori === categoryFilter;
+    const matchesStatus = !statusFilter || statusFilter === "all" || equipment.status === statusFilter;
     
     return matchesSearch && matchesCategory && matchesStatus;
   });
@@ -194,7 +194,7 @@ export default function Equipment() {
                   <SelectValue placeholder="Filter by category" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">All Categories</SelectItem>
+                  <SelectItem value="all">All Categories</SelectItem>
                   {categories.map(category => (
                     <SelectItem key={category} value={category}>{category}</SelectItem>
                   ))}
@@ -205,7 +205,7 @@ export default function Equipment() {
                   <SelectValue placeholder="Filter by status" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">All Status</SelectItem>
+                  <SelectItem value="all">All Status</SelectItem>
                   {statuses.map(status => (
                     <SelectItem key={status} value={status}>{status}</SelectItem>
                   ))}
@@ -246,8 +246,8 @@ export default function Equipment() {
             </p>
             <Button variant="outline" onClick={() => {
               setSearchTerm("");
-              setCategoryFilter("");
-              setStatusFilter("");
+              setCategoryFilter("all");
+              setStatusFilter("all");
             }}>
               Clear Filters
             </Button>

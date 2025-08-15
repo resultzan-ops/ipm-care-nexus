@@ -33,14 +33,16 @@ export function AddUserModal({ open, onOpenChange }: AddUserModalProps) {
       console.log('Creating user with data:', userData);
       
       try {
-        // Create user using Supabase auth directly
+        // Create user using Supabase auth directly - the trigger will handle profile creation
         const { data: authUser, error: authError } = await supabase.auth.signUp({
           email: userData.email,
           password: userData.password,
           options: {
             emailRedirectTo: `${window.location.origin}/`,
             data: {
-              name: userData.name
+              name: userData.name,
+              role: userData.role,
+              phone: userData.phone
             }
           }
         });
@@ -56,51 +58,27 @@ export function AddUserModal({ open, onOpenChange }: AddUserModalProps) {
 
         console.log('Auth user created:', authUser.user.id);
 
-        // Wait a bit to ensure the user is properly created in auth.users
-        await new Promise(resolve => setTimeout(resolve, 1000));
+        // Wait for trigger to create profile and then update it
+        await new Promise(resolve => setTimeout(resolve, 2000));
 
-        // Create profile with retry logic
-        let profile;
-        let attempts = 0;
-        const maxAttempts = 3;
+        // Update the profile with additional data
+        const { data: profile, error: updateError } = await supabase
+          .from('profiles')
+          .update({
+            role: userData.role as any,
+            phone: userData.phone,
+            is_active: true
+          })
+          .eq('user_id', authUser.user.id)
+          .select()
+          .single();
 
-        while (attempts < maxAttempts) {
-          try {
-            const { data: profileData, error: profileError } = await supabase
-              .from('profiles')
-              .insert({
-                user_id: authUser.user.id,
-                name: userData.name,
-                role: userData.role as any,
-                phone: userData.phone,
-                is_active: true
-              })
-              .select()
-              .single();
-
-            if (profileError) {
-              console.error(`Profile creation error (attempt ${attempts + 1}):`, profileError);
-              if (attempts === maxAttempts - 1) {
-                throw new Error(profileError.message);
-              }
-              attempts++;
-              await new Promise(resolve => setTimeout(resolve, 1000));
-              continue;
-            }
-
-            profile = profileData;
-            break;
-          } catch (err) {
-            console.error(`Profile creation failed (attempt ${attempts + 1}):`, err);
-            if (attempts === maxAttempts - 1) {
-              throw err;
-            }
-            attempts++;
-            await new Promise(resolve => setTimeout(resolve, 1000));
-          }
+        if (updateError) {
+          console.error('Profile update error:', updateError);
+          // Still return success since user was created
         }
 
-        console.log('Profile created successfully:', profile);
+        console.log('User creation completed:', { user: authUser.user, profile });
         return { user: authUser.user, profile };
       } catch (err) {
         console.error('Failed to create user:', err);

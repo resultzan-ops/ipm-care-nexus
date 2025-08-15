@@ -8,59 +8,21 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Users as UsersIcon, Plus, Search, Filter, Shield, User, Settings, Eye } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 
-const mockUsers = [
-  {
-    id: "USR-001",
-    name: "Dr. Ahmad Fauzi",
-    email: "ahmad.fauzi@bantul.rs.id",
-    role: "admin_tenant",
-    department: "Radiologi", 
-    status: "Active",
-    lastLogin: "2024-01-15 09:30",
-    avatar: null
-  },
-  {
-    id: "USR-002", 
-    name: "Siti Nurjanah",
-    email: "siti.nurjanah@bantul.rs.id",
-    role: "operator",
-    department: "Laboratorium",
-    status: "Active",
-    lastLogin: "2024-01-15 08:45",
-    avatar: null
-  },
-  {
-    id: "USR-003",
-    name: "Budi Santoso",
-    email: "budi.santoso@bantul.rs.id", 
-    role: "teknisi",
-    department: "Teknisi Biomedis",
-    status: "Active",
-    lastLogin: "2024-01-14 16:20",
-    avatar: null
-  },
-  {
-    id: "USR-004",
-    name: "Dr. Rahman Hidayat",
-    email: "rahman.hidayat@bantul.rs.id",
-    role: "operator",
-    department: "Kardiologi",
-    status: "Inactive",
-    lastLogin: "2024-01-10 11:15",
-    avatar: null
-  },
-  {
-    id: "USR-005",
-    name: "Lisa Marlina",
-    email: "lisa.marlina@bantul.rs.id",
-    role: "admin_tenant", 
-    department: "IT Support",
-    status: "Active",
-    lastLogin: "2024-01-15 10:00",
-    avatar: null
-  }
-];
+interface Profile {
+  id: string;
+  user_id: string;
+  name: string;
+  role: string;
+  tenant_id: string | null;
+  phone: string | null;
+  avatar_url: string | null;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+}
 
 export default function Users() {
   const userRole = "owner";
@@ -69,17 +31,52 @@ export default function Users() {
   const [statusFilter, setStatusFilter] = useState("all");
   const [searchTerm, setSearchTerm] = useState("");
 
-  const filteredUsers = mockUsers.filter(user => {
+  // Fetch real user profiles from Supabase
+  const { data: profiles = [], isLoading } = useQuery({
+    queryKey: ['profiles'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select(`
+          *,
+          tenants!inner(name)
+        `);
+      
+      if (error) throw error;
+      return data as (Profile & { tenants: { name: string } })[];
+    }
+  });
+
+  const filteredUsers = profiles.filter(user => {
     const matchesRole = roleFilter === "all" || user.role === roleFilter;
-    const matchesStatus = statusFilter === "all" || user.status.toLowerCase() === statusFilter;
+    const matchesStatus = statusFilter === "all" || 
+      (statusFilter === "active" && user.is_active) ||
+      (statusFilter === "inactive" && !user.is_active);
     const matchesSearch = user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         user.department.toLowerCase().includes(searchTerm.toLowerCase());
+                         user.role.toLowerCase().includes(searchTerm.toLowerCase());
     return matchesRole && matchesStatus && matchesSearch;
   });
 
+  const getStatistics = () => {
+    const total = profiles.length;
+    const admins = profiles.filter(p => p.role === 'admin_tenant' || p.role === 'super_admin').length;
+    const operators = profiles.filter(p => p.role === 'operator').length;
+    const technicians = profiles.filter(p => p.role === 'teknisi').length;
+    
+    return { total, admins, operators, technicians };
+  };
+
+  const stats = getStatistics();
+
   const getRoleBadge = (role: string) => {
     switch (role) {
+      case "super_admin":
+        return (
+          <Badge variant="destructive" className="gap-1">
+            <Shield className="h-3 w-3" />
+            Super Admin
+          </Badge>
+        );
       case "admin_tenant":
         return (
           <Badge variant="default" className="gap-1">
@@ -106,10 +103,10 @@ export default function Users() {
     }
   };
 
-  const getStatusBadge = (status: string) => {
+  const getStatusBadge = (isActive: boolean) => {
     return (
-      <Badge variant={status === "Active" ? "default" : "secondary"}>
-        {status}
+      <Badge variant={isActive ? "default" : "secondary"}>
+        {isActive ? "Active" : "Inactive"}
       </Badge>
     );
   };
@@ -137,7 +134,7 @@ export default function Users() {
               <div className="flex items-center gap-2">
                 <UsersIcon className="h-8 w-8 text-blue-600" />
                 <div>
-                  <p className="text-2xl font-bold">5</p>
+                  <p className="text-2xl font-bold">{stats.total}</p>
                   <p className="text-sm text-muted-foreground">Total Users</p>
                 </div>
               </div>
@@ -148,7 +145,7 @@ export default function Users() {
               <div className="flex items-center gap-2">
                 <Shield className="h-8 w-8 text-green-600" />
                 <div>
-                  <p className="text-2xl font-bold">2</p>
+                  <p className="text-2xl font-bold">{stats.admins}</p>
                   <p className="text-sm text-muted-foreground">Administrators</p>
                 </div>
               </div>
@@ -159,7 +156,7 @@ export default function Users() {
               <div className="flex items-center gap-2">
                 <User className="h-8 w-8 text-orange-600" />
                 <div>
-                  <p className="text-2xl font-bold">2</p>
+                  <p className="text-2xl font-bold">{stats.operators}</p>
                   <p className="text-sm text-muted-foreground">Operators</p>
                 </div>
               </div>
@@ -170,7 +167,7 @@ export default function Users() {
               <div className="flex items-center gap-2">
                 <Settings className="h-8 w-8 text-purple-600" />
                 <div>
-                  <p className="text-2xl font-bold">1</p>
+                  <p className="text-2xl font-bold">{stats.technicians}</p>
                   <p className="text-sm text-muted-foreground">Technicians</p>
                 </div>
               </div>
@@ -198,6 +195,7 @@ export default function Users() {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">All Roles</SelectItem>
+                  <SelectItem value="super_admin">Super Admin</SelectItem>
                   <SelectItem value="admin_tenant">Administrator</SelectItem>
                   <SelectItem value="operator">Operator</SelectItem>
                   <SelectItem value="teknisi">Technician</SelectItem>
@@ -227,54 +225,60 @@ export default function Users() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>User</TableHead>
-                  <TableHead>Role</TableHead>
-                  <TableHead>Department</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Last Login</TableHead>
-                  <TableHead>Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {filteredUsers.map((user) => (
-                  <TableRow key={user.id}>
-                    <TableCell>
-                      <div className="flex items-center gap-3">
-                        <Avatar>
-                          <AvatarImage src={user.avatar || undefined} />
-                          <AvatarFallback>
-                            {user.name.split(' ').map(n => n[0]).join('')}
-                          </AvatarFallback>
-                        </Avatar>
-                        <div>
-                          <div className="font-medium">{user.name}</div>
-                          <div className="text-sm text-muted-foreground">
-                            {user.role === 'admin_tenant' ? 'Administrator' : 
-                             user.role === 'operator' ? 'Operator' : 
-                             user.role === 'teknisi' ? 'Teknisi' : 
-                             user.role === 'super_admin' ? 'Super Admin' : 
-                             user.role}
+            {isLoading ? (
+              <div className="flex items-center justify-center py-8">
+                <div className="text-muted-foreground">Loading users...</div>
+              </div>
+            ) : (
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>User</TableHead>
+                    <TableHead>Role</TableHead>
+                    <TableHead>Organization</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead>Phone</TableHead>
+                    <TableHead>Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {filteredUsers.map((user) => (
+                    <TableRow key={user.id}>
+                      <TableCell>
+                        <div className="flex items-center gap-3">
+                          <Avatar>
+                            <AvatarImage src={user.avatar_url || undefined} />
+                            <AvatarFallback>
+                              {user.name.split(' ').map(n => n[0]).join('')}
+                            </AvatarFallback>
+                          </Avatar>
+                          <div>
+                            <div className="font-medium">{user.name}</div>
+                            <div className="text-sm text-muted-foreground">
+                              {user.role === 'admin_tenant' ? 'Administrator' : 
+                               user.role === 'operator' ? 'Operator' : 
+                               user.role === 'teknisi' ? 'Teknisi' : 
+                               user.role === 'super_admin' ? 'Super Admin' : 
+                               user.role}
+                            </div>
                           </div>
                         </div>
-                      </div>
-                    </TableCell>
-                    <TableCell>{getRoleBadge(user.role)}</TableCell>
-                    <TableCell>{user.department}</TableCell>
-                    <TableCell>{getStatusBadge(user.status)}</TableCell>
-                    <TableCell className="text-sm">{user.lastLogin}</TableCell>
-                    <TableCell>
-                      <Button variant="ghost" size="sm" className="gap-1">
-                        <Eye className="h-3 w-3" />
-                        View
-                      </Button>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+                      </TableCell>
+                      <TableCell>{getRoleBadge(user.role)}</TableCell>
+                      <TableCell>{(user as any).tenants?.name || 'N/A'}</TableCell>
+                      <TableCell>{getStatusBadge(user.is_active)}</TableCell>
+                      <TableCell className="text-sm">{user.phone || 'N/A'}</TableCell>
+                      <TableCell>
+                        <Button variant="ghost" size="sm" className="gap-1">
+                          <Eye className="h-3 w-3" />
+                          View
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            )}
           </CardContent>
         </Card>
       </div>

@@ -16,6 +16,9 @@ import EquipmentDetail from "./pages/EquipmentDetail";
 import Maintenance from "./pages/Maintenance";
 import Inspections from "./pages/Inspections";
 import Calibrations from "./pages/Calibrations";
+import CalibrationRequests from "./pages/CalibrationRequests";
+import CalibrationProcess from "./pages/CalibrationProcess";
+import CalibrationHistory from "./pages/CalibrationHistory";
 import Reports from "./pages/Reports";
 import Users from "./pages/Users";
 import UserManagement from "./pages/UserManagement";
@@ -48,6 +51,9 @@ const App = () => {
             <Route path="/maintenance" element={<ProtectedRoute><Maintenance /></ProtectedRoute>} />
             <Route path="/inspections" element={<ProtectedRoute><Inspections /></ProtectedRoute>} />
             <Route path="/calibrations" element={<ProtectedRoute><Calibrations /></ProtectedRoute>} />
+            <Route path="/calibrations/requests" element={<ProtectedRoute><CalibrationRequests /></ProtectedRoute>} />
+            <Route path="/calibrations/process" element={<ProtectedRoute><CalibrationProcess /></ProtectedRoute>} />
+            <Route path="/calibrations/history" element={<ProtectedRoute><CalibrationHistory /></ProtectedRoute>} />
             <Route path="/reports" element={<ProtectedRoute><Reports /></ProtectedRoute>} />
             <Route path="/users" element={<ProtectedRoute><Users /></ProtectedRoute>} />
             <Route path="/user-management" element={<ProtectedRoute><UserManagement /></ProtectedRoute>} />

@@ -4,12 +4,14 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Calendar, Plus, Search, Filter, CheckCircle, AlertTriangle, Clock, FileText, Eye, SendHorizontal } from "lucide-react";
+import { Calendar, Plus, Search, Filter, CheckCircle, AlertTriangle, Clock, FileText, Eye, SendHorizontal, ArrowRight, Users, History, Settings2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import { CalibrationRequestModal } from "@/components/calibration/calibration-request-modal";
 import { CertificateViewer } from "@/components/calibration/certificate-viewer";
 import { NotificationSystem } from "@/components/notifications/notification-system";
+import { useAuth } from "@/hooks/useAuth";
 
 // Enhanced mock calibration data with file information
 const mockCalibrations = [
@@ -72,13 +74,22 @@ const mockCalibrations = [
 ];
 
 export default function Calibrations() {
-  const userRole = "owner";
-  const tenantName = "RS Umum Daerah Bantul";
+  const { profile } = useAuth();
   const [statusFilter, setStatusFilter] = useState("all");
   const [searchTerm, setSearchTerm] = useState("");
   const [requestModalOpen, setRequestModalOpen] = useState(false);
   const [certificateViewerOpen, setCertificateViewerOpen] = useState(false);
-  const [selectedCertificate, setSelectedCertificate] = useState<any>(null);
+  const [selectedCertificate, setSelectedCertificate] = useState<{ 
+    id: string;
+    equipmentName: string;
+    certificateNumber: string;
+    calibratedBy: string;
+    calibrationDate: string;
+    validUntil: string;
+    status: string;
+    fileUrl: string; 
+    fileType: 'pdf' | 'jpg' | 'png'; 
+  } | null>(null);
 
   // Transform calibrations for equipment request list
   const equipmentForRequest = mockCalibrations.map(cal => ({
@@ -147,27 +158,153 @@ export default function Calibrations() {
     setCertificateViewerOpen(true);
   };
 
+  // Permission checks for sub-menu access
+  const canAccessRequests = () => {
+    return profile?.role !== 'teknisi';
+  };
+
+  const canAccessProcess = () => {
+    return true; // All roles can access based on their permissions
+  };
+
+  const canAccessHistory = () => {
+    return true; // All roles can access based on their permissions
+  };
+
   return (
-    <DashboardLayout userRole={userRole} tenantName={tenantName}>
+    <DashboardLayout>
       <NotificationSystem />
+      
       <div className="space-y-6">
-        <div className="flex items-center justify-between">
+        <div className="flex justify-between items-center">
           <div>
-            <h1 className="text-3xl font-bold">Equipment Calibrations</h1>
-            <p className="text-muted-foreground mt-1">
-              Manage calibration schedules and certificates
-            </p>
+            <h1 className="text-3xl font-bold">Kalibrasi</h1>
+            <p className="text-muted-foreground">Kelola sistem kalibrasi peralatan medis</p>
           </div>
           <div className="flex gap-2">
-            <Button variant="outline" className="gap-2" onClick={() => setRequestModalOpen(true)}>
-              <SendHorizontal className="h-4 w-4" />
-              Request Calibration
+            <Button
+              onClick={() => setRequestModalOpen(true)}
+              className="bg-blue-600 hover:bg-blue-700"
+            >
+              <SendHorizontal className="h-4 w-4 mr-2" />
+              Request Kalibrasi
             </Button>
-            <Button variant="medical" className="gap-2">
-              <Plus className="h-4 w-4" />
-              Schedule Calibration
+            <Button variant="outline">
+              <Calendar className="h-4 w-4 mr-2" />
+              Jadwal Kalibrasi
             </Button>
           </div>
+        </div>
+
+        {/* Sub-Menu Navigation Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {/* Permintaan Kalibrasi Card */}
+          {canAccessRequests() && (
+            <Card className="hover:shadow-lg transition-shadow cursor-pointer">
+              <Link to="/calibrations/requests">
+                <CardHeader className="pb-3">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-3">
+                      <div className="p-2 bg-blue-100 rounded-lg">
+                        <SendHorizontal className="h-6 w-6 text-blue-600" />
+                      </div>
+                      <div>
+                        <CardTitle className="text-lg">Permintaan Kalibrasi</CardTitle>
+                        <p className="text-sm text-muted-foreground">Kelola permintaan dari RS/Perusahaan</p>
+                      </div>
+                    </div>
+                    <ArrowRight className="h-5 w-5 text-muted-foreground" />
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <div className="flex justify-between items-center">
+                    <div className="flex space-x-4">
+                      <div className="text-center">
+                        <div className="text-2xl font-bold text-yellow-600">2</div>
+                        <div className="text-xs text-muted-foreground">Menunggu</div>
+                      </div>
+                      <div className="text-center">
+                        <div className="text-2xl font-bold text-green-600">5</div>
+                        <div className="text-xs text-muted-foreground">Disetujui</div>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Link>
+            </Card>
+          )}
+
+          {/* Proses Kalibrasi Card */}
+          {canAccessProcess() && (
+            <Card className="hover:shadow-lg transition-shadow cursor-pointer">
+              <Link to="/calibrations/process">
+                <CardHeader className="pb-3">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-3">
+                      <div className="p-2 bg-orange-100 rounded-lg">
+                        <Settings2 className="h-6 w-6 text-orange-600" />
+                      </div>
+                      <div>
+                        <CardTitle className="text-lg">Proses Kalibrasi</CardTitle>
+                        <p className="text-sm text-muted-foreground">Monitor kalibrasi yang berjalan</p>
+                      </div>
+                    </div>
+                    <ArrowRight className="h-5 w-5 text-muted-foreground" />
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <div className="flex justify-between items-center">
+                    <div className="flex space-x-4">
+                      <div className="text-center">
+                        <div className="text-2xl font-bold text-blue-600">3</div>
+                        <div className="text-xs text-muted-foreground">Berjalan</div>
+                      </div>
+                      <div className="text-center">
+                        <div className="text-2xl font-bold text-green-600">1</div>
+                        <div className="text-xs text-muted-foreground">Selesai</div>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Link>
+            </Card>
+          )}
+
+          {/* History Kalibrasi Card */}
+          {canAccessHistory() && (
+            <Card className="hover:shadow-lg transition-shadow cursor-pointer">
+              <Link to="/calibrations/history">
+                <CardHeader className="pb-3">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-3">
+                      <div className="p-2 bg-purple-100 rounded-lg">
+                        <History className="h-6 w-6 text-purple-600" />
+                      </div>
+                      <div>
+                        <CardTitle className="text-lg">History Kalibrasi</CardTitle>
+                        <p className="text-sm text-muted-foreground">Rekap kalibrasi yang telah selesai</p>
+                      </div>
+                    </div>
+                    <ArrowRight className="h-5 w-5 text-muted-foreground" />
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <div className="flex justify-between items-center">
+                    <div className="flex space-x-4">
+                      <div className="text-center">
+                        <div className="text-2xl font-bold text-green-600">12</div>
+                        <div className="text-xs text-muted-foreground">Selesai</div>
+                      </div>
+                      <div className="text-center">
+                        <div className="text-2xl font-bold text-purple-600">45</div>
+                        <div className="text-xs text-muted-foreground">Sertifikat</div>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Link>
+            </Card>
+          )}
         </div>
 
         {/* Statistics Cards */}

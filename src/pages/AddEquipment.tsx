@@ -18,11 +18,11 @@ export default function AddEquipment() {
 
   const [formData, setFormData] = useState({
     nama_alat: "",
-    kategori: "",
+    kategori: undefined as string | undefined,
     nomor_seri: "",
     merk: "",
     model: "",
-    lokasi: "",
+    lokasi: undefined as string | undefined,
     harga_peralatan: "",
     status: "Aktif",
     foto_peralatan: null as File | null
@@ -94,7 +94,8 @@ export default function AddEquipment() {
 
   const generateQRCode = () => {
     // Generate QR code for the equipment
-    const qrData = `QR-${formData.kategori.toUpperCase().slice(0,3)}-${Date.now()}`;
+    const categoryPrefix = formData.kategori ? formData.kategori.toUpperCase().slice(0,3) : "EQP";
+    const qrData = `QR-${categoryPrefix}-${Date.now()}`;
     console.log("Generated QR Code:", qrData);
     
     toast({

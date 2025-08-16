@@ -11,24 +11,21 @@ import {
   Users,
   Wrench,
   FileText,
-  Shield,
+  BarChart3,
   Monitor,
   Cog,
   Download,
   ChevronDown,
-  ChevronRight
+  ChevronRight,
+  CheckSquare,
+  ClipboardList
 } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import { useState, useEffect } from "react";
+import { AppRole, hasPermission } from "@/lib/permissions";
 
 interface SidebarProps {
-  userRole:
-    | "super_admin"
-    | "admin_mitra"
-    | "admin_klien"
-    | "teknisi_mitra"
-    | "operator_klien"
-    | "owner";
+  userRole: AppRole;
 }
 
 const menuItems = [
@@ -36,73 +33,85 @@ const menuItems = [
     icon: Gauge,
     label: "Dashboard",
     href: "/",
-    allowedRoles: ["super_admin", "admin_mitra", "admin_klien", "teknisi_mitra", "operator_klien", "owner"],
+    permission: "dashboard" as const,
   },
   {
     icon: Activity,
     label: "Equipment",
     href: "/equipment",
-    allowedRoles: ["super_admin", "admin_mitra", "admin_klien", "teknisi_mitra", "operator_klien"],
+    permission: "equipment" as const,
   },
   {
     icon: Calendar,
     label: "Maintenance",
     href: "/maintenance",
-    allowedRoles: ["super_admin", "admin_mitra", "admin_klien", "operator_klien"],
+    permission: "maintenance" as const,
   },
   {
     icon: ClipboardCheck,
     label: "Inspections",
     href: "/inspections",
-    allowedRoles: ["super_admin", "admin_mitra", "admin_klien", "teknisi_mitra", "operator_klien"],
+    permission: "inspections" as const,
   },
   {
-    icon: Wrench,
+    icon: Wrench,  
     label: "Calibrations",
     href: "/calibrations",
-    allowedRoles: ["super_admin", "admin_mitra", "admin_klien", "operator_klien"],
+    permission: "calibrations" as const,
+  },
+  {
+    icon: ClipboardList,
+    label: "Tasks / Jadwal Kalibrasi",
+    href: "/tasks",
+    permission: "tasks" as const,
+  },
+  {
+    icon: BarChart3,
+    label: "Reports",
+    href: "/reports",
+    permission: "reports" as const,
   },
   {
     icon: FileText,
     label: "Global Reports",
     href: "/global-reports",
-    allowedRoles: ["super_admin"],
+    permission: "global_reports" as const,
   },
   {
     icon: Monitor,
     label: "Monitoring",
     href: "/monitoring",
-    allowedRoles: ["super_admin"],
+    permission: "monitoring" as const,
   },
   {
     icon: Cog,
     label: "Tools",
     href: "/tools",
-    allowedRoles: ["super_admin"],
+    permission: "tools" as const,
   },
   {
     icon: Download,
     label: "Download",
     href: "/download",
-    allowedRoles: ["super_admin"],
+    permission: "download" as const,
   },
   {
     icon: Building,
     label: "Perusahaan & User",
     href: "#",
-    allowedRoles: ["super_admin", "admin_mitra"],
+    permission: "company_management" as const,
     submenu: [
       {
         icon: Building,
         label: "Manajemen Perusahaan",
         href: "/companies",
-        allowedRoles: ["super_admin", "admin_mitra"],
+        permission: "company_management" as const,
       },
       {
         icon: Users,
         label: "Manajemen User",
-        href: "/users",
-        allowedRoles: ["super_admin", "admin_mitra"],
+        href: "/user-management",
+        permission: "user_management" as const,
       },
     ],
   },
@@ -110,7 +119,7 @@ const menuItems = [
     icon: Settings,
     label: "Settings",
     href: "/settings",
-    allowedRoles: ["super_admin", "admin_mitra", "operator_klien"],
+    permission: "settings" as const,
   },
 ];
 
@@ -164,13 +173,13 @@ export function Sidebar({ userRole }: SidebarProps) {
     return submenuItems.some((subItem) => location.pathname === subItem.href);
   };
 
-  // Show all menu items but filter submenu items based on role
+  // Show all menu items but filter based on permissions
   const processedMenu = menuItems.map((item) => ({
     ...item,
-    isVisible: item.allowedRoles.includes(userRole),
+    isVisible: hasPermission(userRole, item.permission),
     submenu: item.submenu?.map(sub => ({
       ...sub,
-      isVisible: sub.allowedRoles.includes(userRole)
+      isVisible: hasPermission(userRole, sub.permission)
     })).filter(sub => sub.isVisible),
   }));
 

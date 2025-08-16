@@ -29,7 +29,7 @@ import PromoteSuperAdmin from "./pages/PromoteSuperAdmin";
 import Monitoring from "./pages/Monitoring";
 import Tools from "./pages/Tools";
 import Download from "./pages/Download";
-import GlobalReports from "./pages/GlobalReports";
+import Tasks from "./pages/Tasks";
 
 const App = () => {
   // Create QueryClient inside component to avoid SSR issues
@@ -63,7 +63,7 @@ const App = () => {
             <Route path="/calibrations/history" element={<ProtectedRoute><CalibrationHistory /></ProtectedRoute>} />
             <Route path="/reports" element={<ProtectedRoute><Reports /></ProtectedRoute>} />
             <Route path="/users" element={<ProtectedRoute><Users /></ProtectedRoute>} />
-            <Route path="/user-management" element={<ProtectedRoute><UserManagement /></ProtectedRoute>} />
+            <Route path="/tasks" element={<ProtectedRoute><Tasks /></ProtectedRoute>} />
             <Route path="/companies" element={<ProtectedRoute><Companies /></ProtectedRoute>} />
             <Route path="/company-user-management" element={<ProtectedRoute><CompanyUserManagement /></ProtectedRoute>} />
             <Route path="/global-reports" element={<ProtectedRoute><GlobalReports /></ProtectedRoute>} />

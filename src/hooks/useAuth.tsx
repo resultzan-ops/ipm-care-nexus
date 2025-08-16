@@ -6,8 +6,10 @@ interface Profile {
   id: string;
   user_id: string;
   name: string;
+  nama_lengkap: string;
   role: string;
   tenant_id: string | null;
+  company_id: string | null;
   phone: string | null;
   avatar_url: string | null;
   is_active: boolean;

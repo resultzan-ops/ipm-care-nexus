@@ -1,16 +1,17 @@
 import { ReactNode } from "react";
 import { Sidebar } from "./sidebar";
 import { Header } from "./header";
+import { AppRole } from "@/lib/permissions";
 
 interface DashboardLayoutProps {
   children: ReactNode;
-  userRole?: "super_admin" | "admin_mitra" | "admin_klien" | "teknisi_mitra" | "operator_klien";
+  userRole?: AppRole;
   tenantName?: string;
 }
 
 export function DashboardLayout({ 
   children, 
-  userRole = "operator_klien",
+  userRole = "operator",
   tenantName = "Rumah Sakit Umum Daerah"
 }: DashboardLayoutProps) {
   return (

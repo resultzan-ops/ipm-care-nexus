@@ -9,9 +9,11 @@ import {
 import { useAuth } from "@/hooks/useAuth";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 
+import { AppRole } from "@/lib/permissions";
+
 interface HeaderProps {
   tenantName: string;
-  userRole: "super_admin" | "admin_mitra" | "admin_klien" | "teknisi_mitra" | "operator_klien";
+  userRole: AppRole;
 }
 
 const roleLabels = {

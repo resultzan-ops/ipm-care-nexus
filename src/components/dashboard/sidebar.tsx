@@ -11,9 +11,15 @@ import {
   Users, 
   Wrench,
   FileText,
-  Shield
+  Shield,
+  Monitor,
+  Wrench as ToolsIcon,
+  Download,
+  ChevronDown,
+  ChevronRight
 } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
+import { useState } from "react";
 
 interface SidebarProps {
   userRole: "super_admin" | "admin_mitra" | "admin_klien" | "teknisi_mitra" | "operator_klien" | "owner";
@@ -23,10 +29,23 @@ const menuItems = {
   super_admin: [
     { icon: Shield, label: "Dashboard", href: "/" },
     { icon: Activity, label: "Equipment", href: "/equipment" },
-    { icon: Building, label: "Perusahaan & User", href: "/company-user-management" },
-    { icon: Building, label: "Manajemen Perusahaan", href: "/companies" },
-    { icon: Users, label: "Manajemen User", href: "/users" },
+    { icon: Calendar, label: "Maintenance", href: "/maintenance" },
+    { icon: ClipboardCheck, label: "Inspections", href: "/inspections" },
+    { icon: Wrench, label: "Calibrations", href: "/calibrations" },
     { icon: FileText, label: "Global Reports", href: "/global-reports" },
+    { icon: Monitor, label: "Monitoring", href: "/monitoring" },
+    { icon: ToolsIcon, label: "Tools", href: "/tools" },
+    { icon: Download, label: "Download", href: "/download" },
+    { 
+      icon: Building, 
+      label: "Perusahaan & User", 
+      href: "#",
+      submenu: [
+        { icon: Building, label: "Manajemen Perusahaan", href: "/companies" },
+        { icon: Users, label: "Manajemen User", href: "/users" },
+      ]
+    },
+    { icon: Settings, label: "Settings", href: "/settings" },
   ],
   admin_mitra: [
     { icon: Gauge, label: "Dashboard", href: "/" },
@@ -66,9 +85,18 @@ const menuItems = {
 export function Sidebar({ userRole }: SidebarProps) {
   const items = menuItems[userRole] || menuItems.operator_klien;
   const location = useLocation();
+  const [expandedSubmenu, setExpandedSubmenu] = useState<string | null>(null);
 
   // Debug log for role
   console.log("Sidebar userRole:", userRole, "Available items:", items.length);
+
+  const handleSubmenuToggle = (itemLabel: string) => {
+    setExpandedSubmenu(expandedSubmenu === itemLabel ? null : itemLabel);
+  };
+
+  const isSubmenuItemActive = (submenuItems: any[]) => {
+    return submenuItems.some(subItem => location.pathname === subItem.href);
+  };
 
   return (
     <div className="w-64 bg-card border-r border-border h-screen flex flex-col">
@@ -85,19 +113,61 @@ export function Sidebar({ userRole }: SidebarProps) {
       </div>
       
       <nav className="flex-1 p-4 space-y-2">
-        {items.map((item) => (
-          <Link key={item.href} to={item.href}>
-            <Button
-              variant="ghost"
-              className={cn(
-                "w-full justify-start text-left",
-                location.pathname === item.href && "bg-primary/10 text-primary"
-              )}
-            >
-              <item.icon className="h-4 w-4 mr-3" />
-              {item.label}
-            </Button>
-          </Link>
+        {items.map((item: any) => (
+          <div key={item.label}>
+            {item.submenu ? (
+              <div>
+                <Button
+                  variant="ghost"
+                  onClick={() => handleSubmenuToggle(item.label)}
+                  className={cn(
+                    "w-full justify-start text-left",
+                    isSubmenuItemActive(item.submenu) && "bg-primary/10 text-primary"
+                  )}
+                >
+                  <item.icon className="h-4 w-4 mr-3" />
+                  {item.label}
+                  {expandedSubmenu === item.label ? (
+                    <ChevronDown className="h-4 w-4 ml-auto" />
+                  ) : (
+                    <ChevronRight className="h-4 w-4 ml-auto" />
+                  )}
+                </Button>
+                {expandedSubmenu === item.label && (
+                  <div className="ml-6 mt-2 space-y-2">
+                    {item.submenu.map((subItem: any) => (
+                      <Link key={subItem.href} to={subItem.href}>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className={cn(
+                            "w-full justify-start text-left",
+                            location.pathname === subItem.href && "bg-primary/10 text-primary"
+                          )}
+                        >
+                          <subItem.icon className="h-4 w-4 mr-3" />
+                          {subItem.label}
+                        </Button>
+                      </Link>
+                    ))}
+                  </div>
+                )}
+              </div>
+            ) : (
+              <Link to={item.href}>
+                <Button
+                  variant="ghost"
+                  className={cn(
+                    "w-full justify-start text-left",
+                    location.pathname === item.href && "bg-primary/10 text-primary"
+                  )}
+                >
+                  <item.icon className="h-4 w-4 mr-3" />
+                  {item.label}
+                </Button>
+              </Link>
+            )}
+          </div>
         ))}
       </nav>
     </div>

@@ -26,6 +26,10 @@ import Companies from "./pages/Companies";
 import CompanyUserManagement from "./pages/CompanyUserManagement";
 import Settings from "./pages/Settings";
 import PromoteSuperAdmin from "./pages/PromoteSuperAdmin";
+import Monitoring from "./pages/Monitoring";
+import Tools from "./pages/Tools";
+import Download from "./pages/Download";
+import GlobalReports from "./pages/GlobalReports";
 
 const App = () => {
   // Create QueryClient inside component to avoid SSR issues
@@ -62,6 +66,10 @@ const App = () => {
             <Route path="/user-management" element={<ProtectedRoute><UserManagement /></ProtectedRoute>} />
             <Route path="/companies" element={<ProtectedRoute><Companies /></ProtectedRoute>} />
             <Route path="/company-user-management" element={<ProtectedRoute><CompanyUserManagement /></ProtectedRoute>} />
+            <Route path="/global-reports" element={<ProtectedRoute><GlobalReports /></ProtectedRoute>} />
+            <Route path="/monitoring" element={<ProtectedRoute><Monitoring /></ProtectedRoute>} />
+            <Route path="/tools" element={<ProtectedRoute><Tools /></ProtectedRoute>} />
+            <Route path="/download" element={<ProtectedRoute><Download /></ProtectedRoute>} />
             <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
             <Route path="/promote-super-admin" element={<ProtectedRoute><PromoteSuperAdmin /></ProtectedRoute>} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}

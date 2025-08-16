@@ -13,7 +13,7 @@ import {
   FileText,
   Shield,
   Monitor,
-  Tool,
+  Cog,
   Download,
   ChevronDown,
   ChevronRight
@@ -64,9 +64,9 @@ const menuItems = [
   },
   {
     icon: FileText,
-    label: "Reports",
-    href: "/reports",
-    allowedRoles: ["super_admin", "admin_mitra", "operator_klien"],
+    label: "Global Reports",
+    href: "/global-reports",
+    allowedRoles: ["super_admin"],
   },
   {
     icon: Monitor,
@@ -75,10 +75,10 @@ const menuItems = [
     allowedRoles: ["super_admin"],
   },
   {
-    icon: Tool,
+    icon: Cog,
     label: "Tools",
     href: "/tools",
-    allowedRoles: ["super_admin", "admin_mitra"],
+    allowedRoles: ["super_admin"],
   },
   {
     icon: Download,

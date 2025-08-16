@@ -19,7 +19,7 @@ import {
   ChevronRight
 } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 interface SidebarProps {
   userRole:
@@ -116,22 +116,61 @@ const menuItems = [
 
 export function Sidebar({ userRole }: SidebarProps) {
   const location = useLocation();
-  const [expandedSubmenu, setExpandedSubmenu] = useState<string | null>(null);
+  const [expandedSubmenus, setExpandedSubmenus] = useState<Set<string>>(new Set());
+
+  // Initialize expanded submenus from localStorage or set all submenus as expanded by default
+  useEffect(() => {
+    const savedState = localStorage.getItem('sidebar-expanded-submenus');
+    if (savedState) {
+      try {
+        const parsed = JSON.parse(savedState);
+        setExpandedSubmenus(new Set(parsed));
+      } catch (error) {
+        // If parsing fails, default to all submenus expanded
+        const hasSubmenus = menuItems
+          .filter(item => item.submenu && item.submenu.length > 0)
+          .map(item => item.label);
+        setExpandedSubmenus(new Set(hasSubmenus));
+      }
+    } else {
+      // Default: expand all submenus on first visit
+      const hasSubmenus = menuItems
+        .filter(item => item.submenu && item.submenu.length > 0)
+        .map(item => item.label);
+      setExpandedSubmenus(new Set(hasSubmenus));
+    }
+  }, []);
+
+  // Save expanded state to localStorage whenever it changes
+  useEffect(() => {
+    localStorage.setItem('sidebar-expanded-submenus', JSON.stringify(Array.from(expandedSubmenus)));
+  }, [expandedSubmenus]);
 
   const handleSubmenuToggle = (itemLabel: string) => {
-    setExpandedSubmenu(expandedSubmenu === itemLabel ? null : itemLabel);
+    setExpandedSubmenus(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(itemLabel)) {
+        newSet.delete(itemLabel);
+      } else {
+        newSet.add(itemLabel);
+      }
+      return newSet;
+    });
   };
 
   const isSubmenuItemActive = (submenuItems: any[]) => {
     return submenuItems.some((subItem) => location.pathname === subItem.href);
   };
 
-  const filteredMenu = menuItems
-    .filter((item) => item.allowedRoles.includes(userRole))
-    .map((item) => ({
-      ...item,
-      submenu: item.submenu?.filter((sub) => sub.allowedRoles.includes(userRole)),
-    }));
+  // Show all menu items but filter submenu items based on role
+  const processedMenu = menuItems.map((item) => ({
+    ...item,
+    isVisible: item.allowedRoles.includes(userRole),
+    submenu: item.submenu?.map(sub => ({
+      ...sub,
+      isVisible: sub.allowedRoles.includes(userRole)
+    })).filter(sub => sub.isVisible),
+  }));
 
   return (
     <div className="w-64 bg-card border-r border-border h-screen flex flex-col">
@@ -147,63 +186,67 @@ export function Sidebar({ userRole }: SidebarProps) {
         </div>
       </div>
 
-      <nav className="flex-1 p-4 space-y-2">
-        {filteredMenu.map((item) => (
-          <div key={item.label}>
-            {item.submenu && item.submenu.length > 0 ? (
-              <div>
-                <Button
-                  variant="ghost"
-                  onClick={() => handleSubmenuToggle(item.label)}
-                  className={cn(
-                    "w-full justify-start text-left",
-                    isSubmenuItemActive(item.submenu) && "bg-primary/10 text-primary"
+      <nav className="flex-1 p-4 space-y-2 overflow-y-auto">
+        {processedMenu.map((item) => {
+          if (!item.isVisible) return null;
+          
+          return (
+            <div key={item.label}>
+              {item.submenu && item.submenu.length > 0 ? (
+                <div>
+                  <Button
+                    variant="ghost"
+                    onClick={() => handleSubmenuToggle(item.label)}
+                    className={cn(
+                      "w-full justify-start text-left",
+                      isSubmenuItemActive(item.submenu) && "bg-primary/10 text-primary"
+                    )}
+                  >
+                    <item.icon className="h-4 w-4 mr-3" />
+                    {item.label}
+                    {expandedSubmenus.has(item.label) ? (
+                      <ChevronDown className="h-4 w-4 ml-auto" />
+                    ) : (
+                      <ChevronRight className="h-4 w-4 ml-auto" />
+                    )}
+                  </Button>
+                  {expandedSubmenus.has(item.label) && (
+                    <div className="ml-6 mt-2 space-y-2">
+                      {item.submenu.map((subItem) => (
+                        <Link key={subItem.href} to={subItem.href}>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className={cn(
+                              "w-full justify-start text-left",
+                              location.pathname === subItem.href && "bg-primary/10 text-primary"
+                            )}
+                          >
+                            <subItem.icon className="h-4 w-4 mr-3" />
+                            {subItem.label}
+                          </Button>
+                        </Link>
+                      ))}
+                    </div>
                   )}
-                >
-                  <item.icon className="h-4 w-4 mr-3" />
-                  {item.label}
-                  {expandedSubmenu === item.label ? (
-                    <ChevronDown className="h-4 w-4 ml-auto" />
-                  ) : (
-                    <ChevronRight className="h-4 w-4 ml-auto" />
-                  )}
-                </Button>
-                {expandedSubmenu === item.label && (
-                  <div className="ml-6 mt-2 space-y-2">
-                    {item.submenu.map((subItem) => (
-                      <Link key={subItem.href} to={subItem.href}>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className={cn(
-                            "w-full justify-start text-left",
-                            location.pathname === subItem.href && "bg-primary/10 text-primary"
-                          )}
-                        >
-                          <subItem.icon className="h-4 w-4 mr-3" />
-                          {subItem.label}
-                        </Button>
-                      </Link>
-                    ))}
-                  </div>
-                )}
-              </div>
-            ) : (
-              <Link to={item.href}>
-                <Button
-                  variant="ghost"
-                  className={cn(
-                    "w-full justify-start text-left",
-                    location.pathname === item.href && "bg-primary/10 text-primary"
-                  )}
-                >
-                  <item.icon className="h-4 w-4 mr-3" />
-                  {item.label}
-                </Button>
-              </Link>
-            )}
-          </div>
-        ))}
+                </div>
+              ) : (
+                <Link to={item.href}>
+                  <Button
+                    variant="ghost"
+                    className={cn(
+                      "w-full justify-start text-left",
+                      location.pathname === item.href && "bg-primary/10 text-primary"
+                    )}
+                  >
+                    <item.icon className="h-4 w-4 mr-3" />
+                    {item.label}
+                  </Button>
+                </Link>
+              )}
+            </div>
+          );
+        })}
       </nav>
     </div>
   );

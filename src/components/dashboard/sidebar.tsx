@@ -1,19 +1,19 @@
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import { 
-  Activity, 
+import {
+  Activity,
   Building,
-  Calendar, 
-  ClipboardCheck, 
-  Gauge, 
-  Hospital, 
-  Settings, 
-  Users, 
+  Calendar,
+  ClipboardCheck,
+  Gauge,
+  Hospital,
+  Settings,
+  Users,
   Wrench,
   FileText,
   Shield,
   Monitor,
-  Wrench as ToolsIcon,
+  Tool,
   Download,
   ChevronDown,
   ChevronRight
@@ -22,81 +22,116 @@ import { Link, useLocation } from "react-router-dom";
 import { useState } from "react";
 
 interface SidebarProps {
-  userRole: "super_admin" | "admin_mitra" | "admin_klien" | "teknisi_mitra" | "operator_klien" | "owner";
+  userRole:
+    | "super_admin"
+    | "admin_mitra"
+    | "admin_klien"
+    | "teknisi_mitra"
+    | "operator_klien"
+    | "owner";
 }
 
-const menuItems = {
-  super_admin: [
-    { icon: Shield, label: "Dashboard", href: "/" },
-    { icon: Activity, label: "Equipment", href: "/equipment" },
-    { icon: Calendar, label: "Maintenance", href: "/maintenance" },
-    { icon: ClipboardCheck, label: "Inspections", href: "/inspections" },
-    { icon: Wrench, label: "Calibrations", href: "/calibrations" },
-    { icon: FileText, label: "Global Reports", href: "/global-reports" },
-    { icon: Monitor, label: "Monitoring", href: "/monitoring" },
-    { icon: ToolsIcon, label: "Tools", href: "/tools" },
-    { icon: Download, label: "Download", href: "/download" },
-    { 
-      icon: Building, 
-      label: "Perusahaan & User", 
-      href: "#",
-      submenu: [
-        { icon: Building, label: "Manajemen Perusahaan", href: "/companies" },
-        { icon: Users, label: "Manajemen User", href: "/users" },
-      ]
-    },
-    { icon: Settings, label: "Settings", href: "/settings" },
-  ],
-  admin_mitra: [
-    { icon: Gauge, label: "Dashboard", href: "/" },
-    { icon: Activity, label: "Equipment", href: "/equipment" },
-    { icon: Calendar, label: "Maintenance", href: "/maintenance" },
-    { icon: ClipboardCheck, label: "Inspections", href: "/inspections" },
-    { icon: Wrench, label: "Calibrations", href: "/calibrations" },
-    { icon: Users, label: "Users", href: "/users" },
-    { icon: FileText, label: "Reports", href: "/reports" },
-    { icon: Settings, label: "Settings", href: "/settings" },
-  ],
-  admin_klien: [
-    { icon: Gauge, label: "Dashboard", href: "/" },
-    { icon: Activity, label: "Equipment", href: "/equipment" },
-    { icon: Calendar, label: "Maintenance", href: "/maintenance" },
-    { icon: ClipboardCheck, label: "Inspections", href: "/inspections" },
-    { icon: Wrench, label: "Calibrations", href: "/calibrations" },
-  ],
-  teknisi_mitra: [
-    { icon: Gauge, label: "Dashboard", href: "/" },
-    { icon: Calendar, label: "My Tasks", href: "/tasks" },
-    { icon: ClipboardCheck, label: "Inspections", href: "/inspections" },
-    { icon: Activity, label: "Equipment", href: "/equipment" },
-  ],
-  operator_klien: [
-    { icon: Gauge, label: "Dashboard", href: "/" },
-    { icon: Activity, label: "Equipment", href: "/equipment" },
-    { icon: Calendar, label: "Maintenance", href: "/maintenance" },
-    { icon: ClipboardCheck, label: "Inspections", href: "/inspections" },
-    { icon: Wrench, label: "Calibrations", href: "/calibrations" },
-    { icon: Users, label: "Users", href: "/users" },
-    { icon: FileText, label: "Reports", href: "/reports" },
-    { icon: Settings, label: "Settings", href: "/settings" },
-  ],
-};
+const menuItems = [
+  {
+    icon: Gauge,
+    label: "Dashboard",
+    href: "/",
+    allowedRoles: ["super_admin", "admin_mitra", "admin_klien", "teknisi_mitra", "operator_klien", "owner"],
+  },
+  {
+    icon: Activity,
+    label: "Equipment",
+    href: "/equipment",
+    allowedRoles: ["super_admin", "admin_mitra", "admin_klien", "teknisi_mitra", "operator_klien"],
+  },
+  {
+    icon: Calendar,
+    label: "Maintenance",
+    href: "/maintenance",
+    allowedRoles: ["super_admin", "admin_mitra", "admin_klien", "operator_klien"],
+  },
+  {
+    icon: ClipboardCheck,
+    label: "Inspections",
+    href: "/inspections",
+    allowedRoles: ["super_admin", "admin_mitra", "admin_klien", "teknisi_mitra", "operator_klien"],
+  },
+  {
+    icon: Wrench,
+    label: "Calibrations",
+    href: "/calibrations",
+    allowedRoles: ["super_admin", "admin_mitra", "admin_klien", "operator_klien"],
+  },
+  {
+    icon: FileText,
+    label: "Reports",
+    href: "/reports",
+    allowedRoles: ["super_admin", "admin_mitra", "operator_klien"],
+  },
+  {
+    icon: Monitor,
+    label: "Monitoring",
+    href: "/monitoring",
+    allowedRoles: ["super_admin"],
+  },
+  {
+    icon: Tool,
+    label: "Tools",
+    href: "/tools",
+    allowedRoles: ["super_admin", "admin_mitra"],
+  },
+  {
+    icon: Download,
+    label: "Download",
+    href: "/download",
+    allowedRoles: ["super_admin"],
+  },
+  {
+    icon: Building,
+    label: "Perusahaan & User",
+    href: "#",
+    allowedRoles: ["super_admin", "admin_mitra"],
+    submenu: [
+      {
+        icon: Building,
+        label: "Manajemen Perusahaan",
+        href: "/companies",
+        allowedRoles: ["super_admin", "admin_mitra"],
+      },
+      {
+        icon: Users,
+        label: "Manajemen User",
+        href: "/users",
+        allowedRoles: ["super_admin", "admin_mitra"],
+      },
+    ],
+  },
+  {
+    icon: Settings,
+    label: "Settings",
+    href: "/settings",
+    allowedRoles: ["super_admin", "admin_mitra", "operator_klien"],
+  },
+];
 
 export function Sidebar({ userRole }: SidebarProps) {
-  const items = menuItems[userRole] || menuItems.operator_klien;
   const location = useLocation();
   const [expandedSubmenu, setExpandedSubmenu] = useState<string | null>(null);
-
-  // Debug log for role
-  console.log("Sidebar userRole:", userRole, "Available items:", items.length);
 
   const handleSubmenuToggle = (itemLabel: string) => {
     setExpandedSubmenu(expandedSubmenu === itemLabel ? null : itemLabel);
   };
 
   const isSubmenuItemActive = (submenuItems: any[]) => {
-    return submenuItems.some(subItem => location.pathname === subItem.href);
+    return submenuItems.some((subItem) => location.pathname === subItem.href);
   };
+
+  const filteredMenu = menuItems
+    .filter((item) => item.allowedRoles.includes(userRole))
+    .map((item) => ({
+      ...item,
+      submenu: item.submenu?.filter((sub) => sub.allowedRoles.includes(userRole)),
+    }));
 
   return (
     <div className="w-64 bg-card border-r border-border h-screen flex flex-col">
@@ -111,11 +146,11 @@ export function Sidebar({ userRole }: SidebarProps) {
           </div>
         </div>
       </div>
-      
+
       <nav className="flex-1 p-4 space-y-2">
-        {items.map((item: any) => (
+        {filteredMenu.map((item) => (
           <div key={item.label}>
-            {item.submenu ? (
+            {item.submenu && item.submenu.length > 0 ? (
               <div>
                 <Button
                   variant="ghost"
@@ -135,7 +170,7 @@ export function Sidebar({ userRole }: SidebarProps) {
                 </Button>
                 {expandedSubmenu === item.label && (
                   <div className="ml-6 mt-2 space-y-2">
-                    {item.submenu.map((subItem: any) => (
+                    {item.submenu.map((subItem) => (
                       <Link key={subItem.href} to={subItem.href}>
                         <Button
                           variant="ghost"

@@ -31,6 +31,8 @@ import Tools from "./pages/Tools";
 import Download from "./pages/Download";
 import Tasks from "./pages/Tasks";
 import GlobalReports from "./pages/GlobalReports";
+import SuperAdminUserManagement from "./pages/SuperAdminUserManagement";
+import SuperAdminRoleManagement from "./pages/SuperAdminRoleManagement";
 
 const App = () => {
   // Create QueryClient inside component to avoid SSR issues
@@ -68,6 +70,8 @@ const App = () => {
             <Route path="/companies" element={<ProtectedRoute><Companies /></ProtectedRoute>} />
             <Route path="/company-user-management" element={<ProtectedRoute><CompanyUserManagement /></ProtectedRoute>} />
             <Route path="/global-reports" element={<ProtectedRoute><GlobalReports /></ProtectedRoute>} />
+            <Route path="/user-management" element={<ProtectedRoute><SuperAdminUserManagement /></ProtectedRoute>} />
+            <Route path="/role-management" element={<ProtectedRoute><SuperAdminRoleManagement /></ProtectedRoute>} />
             <Route path="/monitoring" element={<ProtectedRoute><Monitoring /></ProtectedRoute>} />
             <Route path="/tools" element={<ProtectedRoute><Tools /></ProtectedRoute>} />
             <Route path="/download" element={<ProtectedRoute><Download /></ProtectedRoute>} />

@@ -76,8 +76,8 @@ const upcomingTasks = [
 ];
 
 export default function Dashboard() {
-  const userRole = "admin_klien"; // This would come from auth context
-  const tenantName = "RS Umum Daerah Bantul";
+  const userRole = "super_admin"; // Updated to show full super_admin menu
+  const tenantName = "IPM System";
   const navigate = useNavigate();
   const [qrModalOpen, setQrModalOpen] = useState(false);
   const [selectedEquipment, setSelectedEquipment] = useState<any>(null);

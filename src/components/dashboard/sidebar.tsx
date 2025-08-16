@@ -118,6 +118,8 @@ export function Sidebar({ userRole }: SidebarProps) {
   const location = useLocation();
   const [expandedSubmenus, setExpandedSubmenus] = useState<Set<string>>(new Set());
 
+  console.log("Sidebar userRole:", userRole); // Debug log to verify role
+
   // Initialize expanded submenus from localStorage or set all submenus as expanded by default
   useEffect(() => {
     const savedState = localStorage.getItem('sidebar-expanded-submenus');

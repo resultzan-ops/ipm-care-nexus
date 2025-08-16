@@ -56,26 +56,34 @@ const menuItems = [
   {
     icon: Wrench,  
     label: "Calibrations",
-    href: "/calibrations",
+    href: "#",
     permission: "calibrations" as const,
-  },
-  {
-    icon: ClipboardList,
-    label: "Tasks / Jadwal Kalibrasi",
-    href: "/tasks",
-    permission: "tasks" as const,
+    submenu: [
+      {
+        icon: FileText,
+        label: "Permintaan Kalibrasi",
+        href: "/calibrations/requests",
+        permission: "calibrations" as const,
+      },
+      {
+        icon: ClipboardCheck,
+        label: "Proses Kalibrasi", 
+        href: "/calibrations/process",
+        permission: "calibrations" as const,
+      },
+      {
+        icon: BarChart3,
+        label: "History Kalibrasi",
+        href: "/calibrations/history",
+        permission: "calibrations" as const,
+      }
+    ]
   },
   {
     icon: BarChart3,
     label: "Reports",
     href: "/reports",
     permission: "reports" as const,
-  },
-  {
-    icon: FileText,
-    label: "Global Reports",
-    href: "/global-reports",
-    permission: "global_reports" as const,
   },
   {
     icon: Monitor,
@@ -96,6 +104,12 @@ const menuItems = [
     permission: "download" as const,
   },
   {
+    icon: CheckSquare,
+    label: "Tasks / Jadwal Kalibrasi",
+    href: "/tasks",
+    permission: "tasks" as const,
+  },
+  {
     icon: Building,
     label: "Perusahaan & User",
     href: "#",
@@ -103,16 +117,34 @@ const menuItems = [
     submenu: [
       {
         icon: Building,
-        label: "Manajemen Perusahaan",
+        label: "Companies",
         href: "/companies",
         permission: "company_management" as const,
       },
       {
         icon: Users,
-        label: "Manajemen User",
+        label: "Users",
+        href: "/users",
+        permission: "user_management" as const,
+      },
+      {
+        icon: Users,
+        label: "User Management",
         href: "/user-management",
         permission: "user_management" as const,
       },
+      {
+        icon: Users,
+        label: "Company User Management",
+        href: "/company-user-management",
+        permission: "user_management" as const,
+      },
+      {
+        icon: FileText,
+        label: "Global Reports",
+        href: "/global-reports",
+        permission: "user_management" as const,
+      }
     ],
   },
   {
@@ -173,15 +205,20 @@ export function Sidebar({ userRole }: SidebarProps) {
     return submenuItems.some((subItem) => location.pathname === subItem.href);
   };
 
-  // Show all menu items but filter based on permissions
-  const processedMenu = menuItems.map((item) => ({
-    ...item,
-    isVisible: hasPermission(userRole, item.permission),
-    submenu: item.submenu?.map(sub => ({
-      ...sub,
-      isVisible: hasPermission(userRole, sub.permission)
-    })).filter(sub => sub.isVisible),
-  }));
+  // Show all menu items but filter based on permissions - but allow visibility of structure
+  const processedMenu = menuItems.map((item) => {
+    const isVisible = hasPermission(userRole, item.permission);
+    const hasVisibleSubmenu = item.submenu?.some(sub => hasPermission(userRole, sub.permission));
+    
+    return {
+      ...item,
+      isVisible: isVisible || hasVisibleSubmenu, // Show if has permission OR has visible submenu
+      submenu: item.submenu?.map(sub => ({
+        ...sub,
+        isVisible: hasPermission(userRole, sub.permission)
+      })).filter(sub => sub.isVisible),
+    };
+  });
 
   return (
     <div className="w-64 bg-card border-r border-border h-screen flex flex-col">

@@ -90,7 +90,7 @@ export default function CalibrationHistory() {
   // Filter history based on user role and permissions
   const filteredHistory = mockHistory.filter(history => {
     // Role-based filtering
-    if (profile?.role === 'admin_rs' && history.tenantId !== profile.tenant_id) {
+    if (profile?.role === 'admin_klien' && history.tenantId !== profile.tenant_id) {
       return false;
     }
     if (profile?.role === 'kalibrator') {
@@ -161,7 +161,7 @@ export default function CalibrationHistory() {
 
   const canDownloadCertificate = () => {
     return profile?.role === 'super_admin' || profile?.role === 'spv' || profile?.role === 'admin_kalibrasi' ||
-           profile?.role === 'kalibrator' || profile?.role === 'admin_rs';
+           profile?.role === 'kalibrator' || profile?.role === 'admin_klien';
   };
 
   const handleDownloadCertificate = (certificate: any) => {

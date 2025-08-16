@@ -11,7 +11,7 @@ interface DashboardLayoutProps {
 
 export function DashboardLayout({ 
   children, 
-  userRole = "operator",
+  userRole = "operator" as AppRole,
   tenantName = "Rumah Sakit Umum Daerah"
 }: DashboardLayoutProps) {
   return (

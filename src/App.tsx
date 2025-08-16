@@ -30,6 +30,7 @@ import Monitoring from "./pages/Monitoring";
 import Tools from "./pages/Tools";
 import Download from "./pages/Download";
 import Tasks from "./pages/Tasks";
+import GlobalReports from "./pages/GlobalReports";
 
 const App = () => {
   // Create QueryClient inside component to avoid SSR issues

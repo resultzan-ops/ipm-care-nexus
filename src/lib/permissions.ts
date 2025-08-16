@@ -39,14 +39,16 @@ export const ROLE_PERMISSIONS: Record<AppRole, Permission[]> = {
     "download",
     "company_management",
     "user_management",
-    "settings"
+    "settings",
+    "tasks"
   ],
   admin_kalibrasi: [
     "dashboard",
     "calibrations",
     "equipment",
     "user_management",
-    "settings"
+    "settings",
+    "tasks"
   ],
   admin_penyedia: [
     "dashboard",

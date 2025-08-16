@@ -164,7 +164,7 @@ export default function Tasks() {
       const { data, error } = await supabase
         .from("profiles")
         .select("user_id, nama_lengkap")
-        .eq("role", "kalibrator")
+        .eq("role", "kalibrator" as any)
         .eq("is_active", true);
 
       if (error) throw error;
@@ -604,7 +604,7 @@ export default function Tasks() {
                       <TableCell>
                         <div className="flex items-center">
                           <Calendar className="h-4 w-4 mr-2 text-muted-foreground" />
-                          {format(new Date(task.scheduled_date), "dd MMM yyyy HH:mm", { locale: id })}
+                          {format(new Date(task.scheduled_date), "dd MMM yyyy HH:mm")}
                         </div>
                       </TableCell>
                       <TableCell>{getStatusBadge(task.status)}</TableCell>

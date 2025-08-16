@@ -7,7 +7,7 @@ interface Profile {
   user_id: string;
   name: string;
   nama_lengkap: string;
-  role: string;
+  role: string; // Keep as string to match database schema
   tenant_id: string | null;
   company_id: string | null;
   phone: string | null;

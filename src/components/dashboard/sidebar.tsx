@@ -18,7 +18,11 @@ import {
   ChevronDown,
   ChevronRight,
   CheckSquare,
-  ClipboardList
+  Clock,
+  UserCheck,
+  Building2,
+  TrendingUp,
+  Shield
 } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import { useState, useEffect } from "react";
@@ -66,13 +70,13 @@ const menuItems = [
         permission: "calibrations" as const,
       },
       {
-        icon: ClipboardCheck,
+        icon: Clock,
         label: "Proses Kalibrasi", 
         href: "/calibrations/process",
         permission: "calibrations" as const,
       },
       {
-        icon: BarChart3,
+        icon: TrendingUp,
         label: "History Kalibrasi",
         href: "/calibrations/history",
         permission: "calibrations" as const,
@@ -116,7 +120,7 @@ const menuItems = [
     permission: "company_management" as const,
     submenu: [
       {
-        icon: Building,
+        icon: Building2,
         label: "Companies",
         href: "/companies",
         permission: "company_management" as const,
@@ -128,13 +132,13 @@ const menuItems = [
         permission: "user_management" as const,
       },
       {
-        icon: Users,
+        icon: UserCheck,
         label: "User Management",
         href: "/user-management",
         permission: "user_management" as const,
       },
       {
-        icon: Users,
+        icon: Shield,
         label: "Company User Management",
         href: "/company-user-management",
         permission: "user_management" as const,
@@ -205,18 +209,19 @@ export function Sidebar({ userRole }: SidebarProps) {
     return submenuItems.some((subItem) => location.pathname === subItem.href);
   };
 
-  // Show all menu items but filter based on permissions - but allow visibility of structure
+  // Process menu items - maintain structure consistency, only control visibility
   const processedMenu = menuItems.map((item) => {
-    const isVisible = hasPermission(userRole, item.permission);
-    const hasVisibleSubmenu = item.submenu?.some(sub => hasPermission(userRole, sub.permission));
+    const hasDirectPermission = hasPermission(userRole, item.permission);
+    const visibleSubmenus = item.submenu?.map(sub => ({
+      ...sub,
+      isVisible: hasPermission(userRole, sub.permission)
+    })) || [];
+    const hasVisibleSubmenu = visibleSubmenus.some(sub => sub.isVisible);
     
     return {
       ...item,
-      isVisible: isVisible || hasVisibleSubmenu, // Show if has permission OR has visible submenu
-      submenu: item.submenu?.map(sub => ({
-        ...sub,
-        isVisible: hasPermission(userRole, sub.permission)
-      })).filter(sub => sub.isVisible),
+      isVisible: hasDirectPermission || hasVisibleSubmenu,
+      submenu: visibleSubmenus,
     };
   });
 
@@ -236,55 +241,63 @@ export function Sidebar({ userRole }: SidebarProps) {
 
       <nav className="flex-1 p-4 space-y-2 overflow-y-auto">
         {processedMenu.map((item) => {
-          if (!item.isVisible) return null;
-          
+          // Always render item structure to maintain consistency, but control visibility
           return (
-            <div key={item.label}>
+            <div key={item.label} className={cn(!item.isVisible && "hidden")}>
               {item.submenu && item.submenu.length > 0 ? (
                 <div>
                   <Button
                     variant="ghost"
-                    onClick={() => handleSubmenuToggle(item.label)}
+                    onClick={() => item.isVisible ? handleSubmenuToggle(item.label) : undefined}
+                    disabled={!item.isVisible}
                     className={cn(
                       "w-full justify-start text-left",
-                      isSubmenuItemActive(item.submenu) && "bg-primary/10 text-primary"
+                      !item.isVisible && "opacity-50 cursor-not-allowed",
+                      item.isVisible && isSubmenuItemActive(item.submenu.filter(sub => sub.isVisible)) && "bg-primary/10 text-primary"
                     )}
                   >
                     <item.icon className="h-4 w-4 mr-3" />
                     {item.label}
-                    {expandedSubmenus.has(item.label) ? (
-                      <ChevronDown className="h-4 w-4 ml-auto" />
-                    ) : (
-                      <ChevronRight className="h-4 w-4 ml-auto" />
+                    {item.isVisible && (
+                      expandedSubmenus.has(item.label) ? (
+                        <ChevronDown className="h-4 w-4 ml-auto" />
+                      ) : (
+                        <ChevronRight className="h-4 w-4 ml-auto" />
+                      )
                     )}
                   </Button>
-                  {expandedSubmenus.has(item.label) && (
+                  {expandedSubmenus.has(item.label) && item.isVisible && (
                     <div className="ml-6 mt-2 space-y-2">
-                      {item.submenu.map((subItem) => (
-                        <Link key={subItem.href} to={subItem.href}>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            className={cn(
-                              "w-full justify-start text-left",
-                              location.pathname === subItem.href && "bg-primary/10 text-primary"
-                            )}
-                          >
-                            <subItem.icon className="h-4 w-4 mr-3" />
-                            {subItem.label}
-                          </Button>
-                        </Link>
-                      ))}
+                      {item.submenu.map((subItem) => {
+                        if (!subItem.isVisible) return null;
+                        return (
+                          <Link key={subItem.href} to={subItem.href}>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className={cn(
+                                "w-full justify-start text-left",
+                                location.pathname === subItem.href && "bg-primary/10 text-primary"
+                              )}
+                            >
+                              <subItem.icon className="h-4 w-4 mr-3" />
+                              {subItem.label}
+                            </Button>
+                          </Link>
+                        );
+                      })}
                     </div>
                   )}
                 </div>
               ) : (
-                <Link to={item.href}>
+                <Link to={item.isVisible ? item.href : "#"} className={cn(!item.isVisible && "pointer-events-none")}>
                   <Button
                     variant="ghost"
+                    disabled={!item.isVisible}
                     className={cn(
                       "w-full justify-start text-left",
-                      location.pathname === item.href && "bg-primary/10 text-primary"
+                      !item.isVisible && "opacity-50 cursor-not-allowed",
+                      item.isVisible && location.pathname === item.href && "bg-primary/10 text-primary"
                     )}
                   >
                     <item.icon className="h-4 w-4 mr-3" />

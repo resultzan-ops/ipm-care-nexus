@@ -3,7 +3,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { FileText, BarChart3, TrendingUp, Globe, Building, Users } from "lucide-react";
 
-export default function GlobalReports() {
+function GlobalReports() {
   const userRole = "super_admin";
   const tenantName = "IPM System";
 
@@ -132,3 +132,5 @@ export default function GlobalReports() {
     </DashboardLayout>
   );
 }
+
+export default GlobalReports;

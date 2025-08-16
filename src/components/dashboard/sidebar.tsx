@@ -83,21 +83,23 @@ export function Sidebar({ userRole }: SidebarProps) {
         </div>
       </div>
       
-      <nav className="flex-1 p-4 space-y-2">
-        {items.map((item) => (
-          <Link key={item.href} to={item.href}>
-            <Button
-              variant="ghost"
-              className={cn(
-                "w-full justify-start text-left",
-                location.pathname === item.href && "bg-primary/10 text-primary"
-              )}
-            >
-              <item.icon className="h-4 w-4 mr-3" />
-              {item.label}
-            </Button>
-          </Link>
-        ))}
+      <nav className="flex-1 p-4">
+        <div className="space-y-1">
+          {items.map((item) => (
+            <Link key={item.href} to={item.href} className="block">
+              <Button
+                variant="ghost"
+                className={cn(
+                  "w-full justify-start text-left h-10 px-3 py-2",
+                  location.pathname === item.href && "bg-primary/10 text-primary"
+                )}
+              >
+                <item.icon className="h-4 w-4 mr-3 flex-shrink-0" />
+                <span className="truncate">{item.label}</span>
+              </Button>
+            </Link>
+          ))}
+        </div>
       </nav>
     </div>
   );

@@ -2,8 +2,9 @@ import { ReactNode } from 'react';
 import { Navigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { AppRole, hasPermission, Permission } from '@/lib/permissions';
-import { Loader2, Shield } from 'lucide-react';
+import { Loader2, Shield, AlertTriangle, RefreshCw } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Button } from '@/components/ui/button';
 
 interface RoleProtectedRouteProps {
   children: ReactNode;
@@ -18,7 +19,7 @@ export default function RoleProtectedRoute({
   requiredPermission,
   fallbackPath = "/" 
 }: RoleProtectedRouteProps) {
-  const { user, profile, loading } = useAuth();
+  const { user, profile, loading, error, refetchProfile } = useAuth();
 
   if (loading) {
     return (
@@ -35,14 +36,45 @@ export default function RoleProtectedRoute({
     return <Navigate to="/auth" replace />;
   }
 
+  if (error) {
+    return (
+      <div className="min-h-screen flex items-center justify-center p-4">
+        <Alert className="max-w-md" variant="destructive">
+          <AlertTriangle className="h-4 w-4" />
+          <AlertDescription className="mb-4">
+            Authentication Error: {error}
+          </AlertDescription>
+          <Button 
+            variant="outline" 
+            size="sm" 
+            onClick={refetchProfile}
+            className="w-full"
+          >
+            <RefreshCw className="h-4 w-4 mr-2" />
+            Retry
+          </Button>
+        </Alert>
+      </div>
+    );
+  }
+
   if (!profile) {
     return (
       <div className="min-h-screen flex items-center justify-center p-4">
-        <Alert className="max-w-md">
+        <Alert className="max-w-md" variant="destructive">
           <Shield className="h-4 w-4" />
-          <AlertDescription>
-            Profile tidak ditemukan. Silakan hubungi administrator.
+          <AlertDescription className="mb-4">
+            Profile tidak ditemukan. Mencoba memuat ulang...
           </AlertDescription>
+          <Button 
+            variant="outline" 
+            size="sm" 
+            onClick={refetchProfile}
+            className="w-full"
+          >
+            <RefreshCw className="h-4 w-4 mr-2" />
+            Reload Profile
+          </Button>
         </Alert>
       </div>
     );
@@ -58,6 +90,10 @@ export default function RoleProtectedRoute({
           <Shield className="h-4 w-4" />
           <AlertDescription>
             Akses ditolak. Anda tidak memiliki role yang diperlukan: {requiredRole}
+            <br />
+            <span className="text-sm text-muted-foreground">
+              Your role: {userRole}
+            </span>
           </AlertDescription>
         </Alert>
       </div>
@@ -72,6 +108,10 @@ export default function RoleProtectedRoute({
           <Shield className="h-4 w-4" />
           <AlertDescription>
             Akses ditolak. Anda tidak memiliki permission: {requiredPermission}
+            <br />
+            <span className="text-sm text-muted-foreground">
+              Your role: {userRole}
+            </span>
           </AlertDescription>
         </Alert>
       </div>

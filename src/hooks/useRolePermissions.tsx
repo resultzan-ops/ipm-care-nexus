@@ -1,11 +1,25 @@
 import { useMemo } from 'react';
 import { useAuth } from './useAuth';
-import { AppRole, hasPermission, getRolePermissions, Permission } from '@/lib/permissions';
+import { AppRole, Permission, getRolePermissions, hasPermission, allPermissions } from '@/lib/permissions';
+
+// Helper: validasi role
+const isValidAppRole = (role: string): role is AppRole => {
+  return Object.values(AppRole).includes(role as AppRole);
+};
+
+// Generate canAccess functions dynamically
+type CanAccessFunctions = {
+  [K in Permission as `canAccess${Capitalize<string & K>}`]: () => boolean;
+};
 
 export function useRolePermissions() {
   const { profile } = useAuth();
-  
-  const userRole = profile?.role as AppRole;
+
+  const userRole = useMemo(() => {
+    if (profile?.role && isValidAppRole(profile.role)) return profile.role;
+    return null;
+  }, [profile?.role]);
+
   const permissions = useMemo(() => {
     if (!userRole) return [];
     return getRolePermissions(userRole);
@@ -16,25 +30,18 @@ export function useRolePermissions() {
     return hasPermission(userRole, permission);
   };
 
-  const isRole = (role: AppRole): boolean => {
-    return userRole === role;
-  };
+  const isRole = (role: AppRole): boolean => userRole === role;
+  const isSuperAdmin = (): boolean => userRole === AppRole.SUPER_ADMIN;
 
-  const isSuperAdmin = (): boolean => {
-    return userRole === 'super_admin';
-  };
-
-  const canAccessCompanyManagement = (): boolean => {
-    return checkPermission('company_management');
-  };
-
-  const canAccessUserManagement = (): boolean => {
-    return checkPermission('user_management');
-  };
-
-  const canAccessGlobalReports = (): boolean => {
-    return checkPermission('global_reports');
-  };
+  // Generate canAccessXXX functions dynamically
+  const canAccessFunctions = useMemo(() => {
+    const result: Partial<CanAccessFunctions> = {};
+    allPermissions.forEach((perm) => {
+      const key = `canAccess${perm.charAt(0).toUpperCase() + perm.slice(1)}` as keyof CanAccessFunctions;
+      result[key] = () => checkPermission(perm);
+    });
+    return result as CanAccessFunctions;
+  }, [userRole]);
 
   return {
     userRole,
@@ -42,8 +49,6 @@ export function useRolePermissions() {
     checkPermission,
     isRole,
     isSuperAdmin,
-    canAccessCompanyManagement,
-    canAccessUserManagement,
-    canAccessGlobalReports
+    ...canAccessFunctions,
   };
 }

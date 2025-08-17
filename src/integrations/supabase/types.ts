@@ -667,10 +667,6 @@ export type Database = {
         }
         Returns: boolean
       }
-      is_super_admin: {
-        Args: Record<PropertyKey, never>
-        Returns: boolean
-      }
       promote_to_super_admin: {
         Args: { target_user_id: string }
         Returns: undefined

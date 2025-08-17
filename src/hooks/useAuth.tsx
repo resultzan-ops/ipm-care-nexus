@@ -51,29 +51,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       if (!profileData) {
         console.warn('No profile found for user:', userId);
-        // Try to create a profile if it doesn't exist
-        const { data: userData } = await supabase.auth.getUser();
-        if (userData.user) {
-          const { data: newProfile, error: createError } = await supabase
-            .from('profiles')
-            .insert({
-              user_id: userId,
-              name: userData.user.email || 'Unknown User',
-              nama_lengkap: userData.user.email || 'Unknown User',
-              role: 'operator_klien' as any, // Default role compatible with DB enum
-              is_active: true
-            })
-            .select()
-            .single();
-
-          if (createError) {
-            console.error('Failed to create profile:', createError);
-            throw new Error(`Failed to create profile: ${createError.message}`);
-          }
-
-          console.log('Created new profile:', newProfile);
-          return newProfile;
-        }
+        
+        // For existing users who don't have profiles yet, let's not auto-create
+        // This should be handled by admin or registration process
+        setError('Profile not found. Please contact administrator to set up your account.');
         return null;
       }
 

@@ -14,6 +14,48 @@ export type Database = {
   }
   public: {
     Tables: {
+      audit_logs: {
+        Row: {
+          action: string
+          changes: Json | null
+          created_at: string | null
+          id: string
+          ip_address: unknown | null
+          target_id: string
+          target_name: string
+          target_type: string
+          user_agent: string | null
+          user_id: string | null
+          user_name: string
+        }
+        Insert: {
+          action: string
+          changes?: Json | null
+          created_at?: string | null
+          id?: string
+          ip_address?: unknown | null
+          target_id: string
+          target_name: string
+          target_type: string
+          user_agent?: string | null
+          user_id?: string | null
+          user_name: string
+        }
+        Update: {
+          action?: string
+          changes?: Json | null
+          created_at?: string | null
+          id?: string
+          ip_address?: unknown | null
+          target_id?: string
+          target_name?: string
+          target_type?: string
+          user_agent?: string | null
+          user_id?: string | null
+          user_name?: string
+        }
+        Relationships: []
+      }
       calibration_records: {
         Row: {
           calibration_date: string

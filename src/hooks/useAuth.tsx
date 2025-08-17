@@ -60,7 +60,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
               user_id: userId,
               name: userData.user.email || 'Unknown User',
               nama_lengkap: userData.user.email || 'Unknown User',
-              role: 'operator', // Default role
+              role: 'operator_klien' as any, // Default role compatible with DB enum
               is_active: true
             })
             .select()

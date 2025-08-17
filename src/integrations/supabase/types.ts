@@ -634,6 +634,15 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: string
       }
+      debug_auth_state: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          current_user_id: string
+          policies_active: boolean
+          profile_data: Json
+          profile_exists: boolean
+        }[]
+      }
       generate_barcode: {
         Args: Record<PropertyKey, never>
         Returns: string
@@ -661,6 +670,15 @@ export type Database = {
       promote_to_super_admin: {
         Args: { target_user_id: string }
         Returns: undefined
+      }
+      test_dayax_profile: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          can_access_with_rls: boolean
+          profile_data: Json
+          profile_exists: boolean
+          user_exists: boolean
+        }[]
       }
       update_user_role: {
         Args: {

@@ -647,6 +647,10 @@ export type Database = {
           user_id: string
         }[]
       }
+      get_user_role: {
+        Args: { _user_id: string }
+        Returns: Database["public"]["Enums"]["app_role"]
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -656,6 +660,14 @@ export type Database = {
       }
       promote_to_super_admin: {
         Args: { target_user_id: string }
+        Returns: undefined
+      }
+      update_user_role: {
+        Args: {
+          _admin_user_id?: string
+          _new_role: Database["public"]["Enums"]["app_role"]
+          _target_user_id: string
+        }
         Returns: undefined
       }
     }

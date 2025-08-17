@@ -1,4 +1,7 @@
 import { useState, useEffect } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
+import { useToast } from "@/hooks/use-toast";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -6,19 +9,20 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Plus, Edit, Trash2, Users, Building, Shield, Search, Filter } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
+import { Edit, Users, Building, Shield, Search, AlertTriangle } from "lucide-react";
 import { AppRole, ROLE_DISPLAY_NAMES } from "@/lib/permissions";
+import { Switch } from "@/components/ui/switch";
 
 interface User {
   id: string;
+  user_id: string;
   name: string;
   email: string;
   phone?: string;
   avatar_url?: string;
-  role: AppRole;
+  role: string;
   company_id?: string;
   company_name?: string;
   company_type?: string;
@@ -29,8 +33,8 @@ interface User {
 
 interface Company {
   id: string;
-  name: string;
-  type: string;
+  nama_perusahaan: string;
+  company_type: string;
   email?: string;
   phone?: string;
   address?: string;
@@ -38,129 +42,164 @@ interface Company {
 }
 
 const COMPANY_TYPES = [
-  { value: "klien", label: "Klien Rumah Sakit/Perusahaan" },
-  { value: "mitra", label: "Mitra Penyedia (Kalibrasi)" },
-  { value: "internal", label: "Internal System" },
+  { value: "Klien Rumah Sakit/Perusahaan", label: "Klien Rumah Sakit/Perusahaan" },
+  { value: "Mitra Penyedia (Kalibrasi)", label: "Mitra Penyedia (Kalibrasi)" },
+  { value: "Internal System", label: "Internal System" },
 ];
 
 export function EnhancedUserManagement() {
   const [users, setUsers] = useState<User[]>([]);
   const [companies, setCompanies] = useState<Company[]>([]);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
-  const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [roleFilter, setRoleFilter] = useState<string>("all");
   const [companyFilter, setCompanyFilter] = useState<string>("all");
   const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [loading, setLoading] = useState(true);
   
-  const [newUser, setNewUser] = useState({
-    name: "",
-    email: "",
-    phone: "",
-    role: "operator" as AppRole,
-    company_id: "",
-    is_active: true
-  });
-
+  const { profile } = useAuth();
   const { toast } = useToast();
 
-  // Mock data - in real app, fetch from Supabase
+  // Check if current user is Super Admin
+  const isSuperAdmin = profile?.role === 'super_admin';
+
+  // Fetch real data from Supabase
   useEffect(() => {
-    const mockCompanies: Company[] = [
-      {
-        id: "1",
-        name: "RS Umum Daerah Jakarta",
-        type: "klien",
-        email: "info@rsudjakarta.com",
-        phone: "+62-21-1234567",
-        address: "Jakarta Pusat",
-        users_count: 25
-      },
-      {
-        id: "2", 
-        name: "PT Kalibrasi Medis Indonesia",
-        type: "mitra",
-        email: "admin@kalmed.co.id",
-        phone: "+62-21-7654321",
-        address: "Jakarta Selatan",
-        users_count: 12
-      },
-      {
-        id: "3",
-        name: "System Internal",
-        type: "internal",
-        email: "system@ipmsystem.com",
-        users_count: 5
-      }
-    ];
+    if (isSuperAdmin) {
+      fetchUsers();
+      fetchCompanies();
+    } else {
+      setLoading(false);
+    }
+  }, [isSuperAdmin]);
 
-    const mockUsers: User[] = [
-      {
-        id: "1",
-        name: "Super Administrator",
-        email: "superadmin@system.com",
-        role: "super_admin",
-        company_id: "3",
-        company_name: "System Internal",
-        company_type: "internal",
-        is_active: true,
-        created_at: "2024-01-01T00:00:00Z",
-        last_login: "2024-01-15T10:30:00Z"
-      },
-      {
-        id: "2",
-        name: "Dr. Ahmad Wijaya",
-        email: "ahmad.wijaya@rsudjakarta.com",
-        phone: "+62-812-3456789",
-        role: "admin_klien",
-        company_id: "1",
-        company_name: "RS Umum Daerah Jakarta",
-        company_type: "klien",
-        is_active: true,
-        created_at: "2024-01-02T00:00:00Z",
-        last_login: "2024-01-15T09:15:00Z"
-      },
-      {
-        id: "3",
-        name: "Siti Nurhaliza",
-        email: "siti@kalmed.co.id",
-        phone: "+62-811-7654321",
-        role: "admin_penyedia",
-        company_id: "2",
-        company_name: "PT Kalibrasi Medis Indonesia",
-        company_type: "mitra",
-        is_active: true,
-        created_at: "2024-01-03T00:00:00Z",
-        last_login: "2024-01-15T08:45:00Z"
-      },
-      {
-        id: "4",
-        name: "Budi Santoso",
-        email: "budi@kalmed.co.id",
-        role: "teknisi",
-        company_id: "2",
-        company_name: "PT Kalibrasi Medis Indonesia",
-        company_type: "mitra",
-        is_active: true,
-        created_at: "2024-01-04T00:00:00Z"
-      },
-      {
-        id: "5",
-        name: "Rina Kusuma",
-        email: "rina@rsudjakarta.com",
-        role: "operator",
-        company_id: "1",
-        company_name: "RS Umum Daerah Jakarta",
-        company_type: "klien",
-        is_active: false,
-        created_at: "2024-01-05T00:00:00Z"
-      }
-    ];
+  const fetchUsers = async () => {
+    try {
+      setLoading(true);
+      
+      const { data, error } = await supabase
+        .from('profiles')
+        .select(`
+          *,
+          tenants:company_id(
+            nama_perusahaan,
+            company_type
+          )
+        `)
+        .order('created_at', { ascending: false });
 
-    setCompanies(mockCompanies);
-    setUsers(mockUsers);
-  }, []);
+      if (error) throw error;
+
+      const formattedUsers: User[] = data?.map(profile => ({
+        id: profile.id,
+        user_id: profile.user_id,
+        name: profile.nama_lengkap || profile.name,
+        email: profile.name, // In this schema, name field stores email
+        phone: profile.no_hp || profile.phone,
+        avatar_url: profile.avatar_url,
+        role: profile.role,
+        company_id: profile.company_id,
+        company_name: (profile.tenants as any)?.nama_perusahaan,
+        company_type: (profile.tenants as any)?.company_type,
+        is_active: profile.is_active,
+        created_at: profile.created_at,
+      })) || [];
+
+      setUsers(formattedUsers);
+    } catch (error) {
+      console.error('Error fetching users:', error);
+      toast({
+        title: "Error",
+        description: "Failed to fetch user data",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchCompanies = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('tenants')
+        .select('*')
+        .order('nama_perusahaan');
+
+      if (error) throw error;
+
+      const formattedCompanies: Company[] = data?.map(tenant => ({
+        id: tenant.id,
+        nama_perusahaan: tenant.nama_perusahaan,
+        company_type: tenant.company_type,
+        email: tenant.email,
+        phone: tenant.phone,
+        address: tenant.alamat || tenant.address,
+        users_count: 0 // Would need to calculate this separately
+      })) || [];
+
+      setCompanies(formattedCompanies);
+    } catch (error) {
+      console.error('Error fetching companies:', error);
+    }
+  };
+
+  const updateUserRole = async (userId: string, newRole: string) => {
+    try {
+      // Use the secure database function
+      const { error } = await supabase.rpc('update_user_role', {
+        _target_user_id: userId,
+        _new_role: newRole as any // Cast to handle enum type
+      });
+
+      if (error) throw error;
+
+      // Refresh users list
+      await fetchUsers();
+
+      toast({
+        title: "Success",
+        description: "User role updated successfully",
+      });
+
+    } catch (error: any) {
+      console.error('Error updating user role:', error);
+      toast({
+        title: "Error",
+        description: error.message || "Failed to update user role",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const toggleUserStatus = async (userId: string, isActive: boolean) => {
+    try {
+      const { error } = await supabase
+        .from('profiles')
+        .update({ is_active: isActive })
+        .eq('user_id', userId);
+
+      if (error) throw error;
+
+      // Update local state
+      setUsers(users.map(user => 
+        user.user_id === userId ? { ...user, is_active: isActive } : user
+      ));
+
+      toast({
+        title: "Success",
+        description: `User ${isActive ? 'activated' : 'deactivated'} successfully`,
+      });
+
+    } catch (error) {
+      console.error('Error updating user status:', error);
+      toast({
+        title: "Error",
+        description: "Failed to update user status",
+        variant: "destructive",
+      });
+    }
+  };
 
   // Filter users based on search and filters
   const filteredUsers = users.filter(user => {
@@ -179,63 +218,7 @@ export function EnhancedUserManagement() {
     return matchesSearch && matchesRole && matchesCompany && matchesStatus;
   });
 
-  const handleCreateUser = () => {
-    const selectedCompany = companies.find(c => c.id === newUser.company_id);
-    const user: User = {
-      id: Date.now().toString(),
-      ...newUser,
-      company_name: selectedCompany?.name,
-      company_type: selectedCompany?.type,
-      created_at: new Date().toISOString()
-    };
-    
-    setUsers([...users, user]);
-    setNewUser({ name: "", email: "", phone: "", role: "operator", company_id: "", is_active: true });
-    setIsCreateDialogOpen(false);
-    
-    toast({
-      title: "User Created",
-      description: `User "${user.name}" has been created successfully.`,
-    });
-  };
-
-  const handleEditUser = () => {
-    if (!selectedUser) return;
-    
-    const updatedUsers = users.map(user => 
-      user.id === selectedUser.id ? selectedUser : user
-    );
-    
-    setUsers(updatedUsers);
-    setSelectedUser(null);
-    setIsEditDialogOpen(false);
-    
-    toast({
-      title: "User Updated",
-      description: `User "${selectedUser.name}" has been updated successfully.`,
-    });
-  };
-
-  const handleDeleteUser = (userId: string) => {
-    const user = users.find(u => u.id === userId);
-    if (user?.role === "super_admin") {
-      toast({
-        title: "Cannot Delete",
-        description: "Super Admin user cannot be deleted.",
-        variant: "destructive",
-      });
-      return;
-    }
-    
-    setUsers(users.filter(user => user.id !== userId));
-    toast({
-      title: "User Deleted",
-      description: "User has been deleted successfully.",
-      variant: "destructive",
-    });
-  };
-
-  const getRoleBadgeVariant = (role: AppRole) => {
+  const getRoleBadgeVariant = (role: string) => {
     switch (role) {
       case "super_admin":
         return "destructive";
@@ -252,11 +235,11 @@ export function EnhancedUserManagement() {
 
   const getCompanyTypeBadge = (type?: string) => {
     switch (type) {
-      case "klien":
+      case "Klien Rumah Sakit/Perusahaan":
         return <Badge variant="outline" className="bg-blue-50 text-blue-700">Klien</Badge>;
-      case "mitra":
+      case "Mitra Penyedia (Kalibrasi)":
         return <Badge variant="outline" className="bg-green-50 text-green-700">Mitra</Badge>;
-      case "internal":
+      case "Internal System":
         return <Badge variant="outline" className="bg-purple-50 text-purple-700">Internal</Badge>;
       default:
         return <Badge variant="outline">Unknown</Badge>;
@@ -272,6 +255,29 @@ export function EnhancedUserManagement() {
     return { totalUsers, activeUsers, totalCompanies, adminUsers };
   };
 
+  if (!isSuperAdmin) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="text-center">
+          <AlertTriangle className="h-12 w-12 text-yellow-500 mx-auto mb-4" />
+          <h3 className="text-lg font-semibold mb-2">Access Denied</h3>
+          <p className="text-muted-foreground">Only Super Admins can access user management.</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+          <p className="text-muted-foreground">Loading users...</p>
+        </div>
+      </div>
+    );
+  }
+
   const stats = getStatistics();
 
   return (
@@ -281,94 +287,6 @@ export function EnhancedUserManagement() {
           <h2 className="text-2xl font-bold">Enhanced User Management</h2>
           <p className="text-muted-foreground">Manage users, companies, and role assignments</p>
         </div>
-        <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
-          <DialogTrigger asChild>
-            <Button>
-              <Plus className="h-4 w-4 mr-2" />
-              Create User
-            </Button>
-          </DialogTrigger>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Create New User</DialogTitle>
-              <DialogDescription>
-                Add a new user to the system with company and role assignment
-              </DialogDescription>
-            </DialogHeader>
-            <div className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <Label htmlFor="user-name">Full Name</Label>
-                  <Input
-                    id="user-name"
-                    value={newUser.name}
-                    onChange={(e) => setNewUser({...newUser, name: e.target.value})}
-                    placeholder="Enter full name"
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="user-email">Email</Label>
-                  <Input
-                    id="user-email"
-                    type="email"
-                    value={newUser.email}
-                    onChange={(e) => setNewUser({...newUser, email: e.target.value})}
-                    placeholder="Enter email address"
-                  />
-                </div>
-              </div>
-              <div>
-                <Label htmlFor="user-phone">Phone Number</Label>
-                <Input
-                  id="user-phone"
-                  value={newUser.phone}
-                  onChange={(e) => setNewUser({...newUser, phone: e.target.value})}
-                  placeholder="Enter phone number"
-                />
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <Label htmlFor="user-company">Company</Label>
-                  <Select value={newUser.company_id} onValueChange={(value) => setNewUser({...newUser, company_id: value})}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select company" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {companies.map((company) => (
-                        <SelectItem key={company.id} value={company.id}>
-                          {company.name} ({company.type})
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div>
-                  <Label htmlFor="user-role">Role</Label>
-                  <Select value={newUser.role} onValueChange={(value) => setNewUser({...newUser, role: value as AppRole})}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select role" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {Object.entries(ROLE_DISPLAY_NAMES).map(([role, displayName]) => (
-                        <SelectItem key={role} value={role} disabled={role === "super_admin"}>
-                          {displayName}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-              <div className="flex justify-end space-x-2">
-                <Button variant="outline" onClick={() => setIsCreateDialogOpen(false)}>
-                  Cancel
-                </Button>
-                <Button onClick={handleCreateUser}>
-                  Create User
-                </Button>
-              </div>
-            </div>
-          </DialogContent>
-        </Dialog>
       </div>
 
       {/* Statistics Cards */}
@@ -410,7 +328,7 @@ export function EnhancedUserManagement() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {Math.round((stats.activeUsers / stats.totalUsers) * 100)}%
+              {stats.totalUsers > 0 ? Math.round((stats.activeUsers / stats.totalUsers) * 100) : 0}%
             </div>
           </CardContent>
         </Card>
@@ -422,7 +340,7 @@ export function EnhancedUserManagement() {
           <CardTitle>Filters</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             <div>
               <Label htmlFor="search">Search</Label>
               <div className="relative">
@@ -465,11 +383,6 @@ export function EnhancedUserManagement() {
                       {type.label}
                     </SelectItem>
                   ))}
-                  {companies.map((company) => (
-                    <SelectItem key={company.id} value={company.id}>
-                      {company.name}
-                    </SelectItem>
-                  ))}
                 </SelectContent>
               </Select>
             </div>
@@ -486,17 +399,6 @@ export function EnhancedUserManagement() {
                 </SelectContent>
               </Select>
             </div>
-            <div className="flex items-end">
-              <Button variant="outline" onClick={() => {
-                setSearchTerm("");
-                setRoleFilter("all");
-                setCompanyFilter("all");
-                setStatusFilter("all");
-              }}>
-                <Filter className="h-4 w-4 mr-2" />
-                Clear Filters
-              </Button>
-            </div>
           </div>
         </CardContent>
       </Card>
@@ -506,7 +408,7 @@ export function EnhancedUserManagement() {
         <CardHeader>
           <CardTitle>Users ({filteredUsers.length})</CardTitle>
           <CardDescription>
-            Manage user accounts, roles, and company assignments
+            Manage system users and their roles
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -514,10 +416,10 @@ export function EnhancedUserManagement() {
             <TableHeader>
               <TableRow>
                 <TableHead>User</TableHead>
+                <TableHead>Email</TableHead>
                 <TableHead>Role</TableHead>
                 <TableHead>Company</TableHead>
                 <TableHead>Status</TableHead>
-                <TableHead>Last Login</TableHead>
                 <TableHead>Actions</TableHead>
               </TableRow>
             </TableHeader>
@@ -529,64 +431,53 @@ export function EnhancedUserManagement() {
                       <Avatar className="h-8 w-8">
                         <AvatarImage src={user.avatar_url} />
                         <AvatarFallback>
-                          {user.name.split(' ').map(n => n[0]).join('').toUpperCase()}
+                          {user.name.charAt(0).toUpperCase()}
                         </AvatarFallback>
                       </Avatar>
                       <div>
-                        <p className="font-medium">{user.name}</p>
-                        <p className="text-sm text-muted-foreground">{user.email}</p>
-                        {user.phone && (
-                          <p className="text-xs text-muted-foreground">{user.phone}</p>
-                        )}
+                        <div className="font-medium">{user.name}</div>
+                        <div className="text-sm text-muted-foreground">
+                          {user.phone}
+                        </div>
                       </div>
                     </div>
                   </TableCell>
+                  <TableCell>{user.email}</TableCell>
                   <TableCell>
                     <Badge variant={getRoleBadgeVariant(user.role)}>
-                      {ROLE_DISPLAY_NAMES[user.role]}
+                      {ROLE_DISPLAY_NAMES[user.role as AppRole] || user.role}
                     </Badge>
                   </TableCell>
                   <TableCell>
-                    <div className="space-y-1">
-                      <p className="font-medium text-sm">{user.company_name}</p>
-                      {getCompanyTypeBadge(user.company_type)}
+                    <div>
+                      <div className="font-medium">{user.company_name || 'No Company'}</div>
+                      {user.company_type && getCompanyTypeBadge(user.company_type)}
                     </div>
                   </TableCell>
                   <TableCell>
-                    <Badge variant={user.is_active ? "default" : "secondary"}>
-                      {user.is_active ? "Active" : "Inactive"}
-                    </Badge>
-                  </TableCell>
-                  <TableCell>
-                    {user.last_login ? (
-                      <p className="text-sm">
-                        {new Date(user.last_login).toLocaleDateString()}
-                      </p>
-                    ) : (
-                      <p className="text-sm text-muted-foreground">Never</p>
-                    )}
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex space-x-2">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => {
-                          setSelectedUser(user);
-                          setIsEditDialogOpen(true);
-                        }}
-                      >
-                        <Edit className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => handleDeleteUser(user.id)}
-                        disabled={user.role === "super_admin"}
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
+                    <div className="flex items-center space-x-2">
+                      <Switch
+                        checked={user.is_active}
+                        onCheckedChange={(checked) => toggleUserStatus(user.user_id, checked)}
+                        disabled={user.role === 'super_admin'}
+                      />
+                      <span className="text-sm">
+                        {user.is_active ? 'Active' : 'Inactive'}
+                      </span>
                     </div>
+                  </TableCell>
+                  <TableCell>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        setSelectedUser(user);
+                        setIsEditDialogOpen(true);
+                      }}
+                      disabled={user.role === 'super_admin' && profile?.user_id !== user.user_id}
+                    >
+                      <Edit className="h-4 w-4" />
+                    </Button>
                   </TableCell>
                 </TableRow>
               ))}
@@ -599,103 +490,53 @@ export function EnhancedUserManagement() {
       <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Edit User</DialogTitle>
+            <DialogTitle>Edit User Role</DialogTitle>
             <DialogDescription>
-              Modify user information, role, and company assignment
+              Change the user's role and permissions
             </DialogDescription>
           </DialogHeader>
           {selectedUser && (
             <div className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <Label htmlFor="edit-user-name">Full Name</Label>
-                  <Input
-                    id="edit-user-name"
-                    value={selectedUser.name}
-                    onChange={(e) => setSelectedUser({...selectedUser, name: e.target.value})}
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="edit-user-email">Email</Label>
-                  <Input
-                    id="edit-user-email"
-                    type="email"
-                    value={selectedUser.email}
-                    onChange={(e) => setSelectedUser({...selectedUser, email: e.target.value})}
-                  />
-                </div>
+              <div>
+                <Label>User</Label>
+                <p className="text-sm font-medium">{selectedUser.name}</p>
+                <p className="text-sm text-muted-foreground">{selectedUser.email}</p>
               </div>
               <div>
-                <Label htmlFor="edit-user-phone">Phone Number</Label>
-                <Input
-                  id="edit-user-phone"
-                  value={selectedUser.phone || ""}
-                  onChange={(e) => setSelectedUser({...selectedUser, phone: e.target.value})}
-                />
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <Label htmlFor="edit-user-company">Company</Label>
-                  <Select 
-                    value={selectedUser.company_id || ""} 
-                    onValueChange={(value) => {
-                      const company = companies.find(c => c.id === value);
-                      setSelectedUser({
-                        ...selectedUser, 
-                        company_id: value,
-                        company_name: company?.name,
-                        company_type: company?.type
-                      });
-                    }}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select company" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {companies.map((company) => (
-                        <SelectItem key={company.id} value={company.id}>
-                          {company.name} ({company.type})
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div>
-                  <Label htmlFor="edit-user-role">Role</Label>
-                  <Select 
-                    value={selectedUser.role} 
-                    onValueChange={(value) => setSelectedUser({...selectedUser, role: value as AppRole})}
-                    disabled={selectedUser.role === "super_admin"}
-                  >
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {Object.entries(ROLE_DISPLAY_NAMES).map(([role, displayName]) => (
-                        <SelectItem key={role} value={role}>
-                          {displayName}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-              <div className="flex items-center space-x-2">
-                <input
-                  type="checkbox"
-                  id="edit-user-active"
-                  checked={selectedUser.is_active}
-                  onChange={(e) => setSelectedUser({...selectedUser, is_active: e.target.checked})}
-                  disabled={selectedUser.role === "super_admin"}
-                />
-                <Label htmlFor="edit-user-active">Active User</Label>
+                <Label htmlFor="user-role">Role</Label>
+                <Select 
+                  value={selectedUser.role} 
+                  onValueChange={(value) => setSelectedUser({...selectedUser, role: value})}
+                  disabled={selectedUser.role === 'super_admin'}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {Object.entries(ROLE_DISPLAY_NAMES).map(([role, displayName]) => (
+                      <SelectItem 
+                        key={role} 
+                        value={role}
+                        disabled={role === 'super_admin' && selectedUser.role !== 'super_admin'}
+                      >
+                        {displayName}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
               <div className="flex justify-end space-x-2">
                 <Button variant="outline" onClick={() => setIsEditDialogOpen(false)}>
                   Cancel
                 </Button>
-                <Button onClick={handleEditUser}>
-                  Update User
+                <Button 
+                  onClick={() => {
+                    updateUserRole(selectedUser.user_id, selectedUser.role);
+                    setIsEditDialogOpen(false);
+                  }}
+                  disabled={selectedUser.role === 'super_admin'}
+                >
+                  Update Role
                 </Button>
               </div>
             </div>

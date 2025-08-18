@@ -113,3 +113,33 @@ export function canAccessCompanyManagement(role: AppRole): boolean {
 export function canAccessUserManagement(role: AppRole): boolean {
   return hasPermission(role, "user_management");
 }
+
+// Export all permissions array for dynamic access
+export const allPermissions: Permission[] = [
+  "dashboard",
+  "equipment",
+  "maintenance",
+  "inspections", 
+  "calibrations",
+  "reports",
+  "global_reports",
+  "monitoring",
+  "tools",
+  "download",
+  "company_management",
+  "user_management",
+  "settings",
+  "tasks"
+];
+
+// Export all roles array for validation
+export const allRoles: AppRole[] = [
+  "super_admin",
+  "admin_kalibrasi",
+  "admin_penyedia", 
+  "admin_klien",
+  "kalibrator",
+  "teknisi",
+  "operator",
+  "spv"
+];

@@ -1,10 +1,10 @@
 import { useMemo } from 'react';
 import { useAuth } from './useAuth';
-import { AppRole, Permission, getRolePermissions, hasPermission, allPermissions } from '@/lib/permissions';
+import { AppRole, Permission, getRolePermissions, hasPermission, allPermissions, allRoles } from '@/lib/permissions';
 
 // Helper: validasi role
 const isValidAppRole = (role: string): role is AppRole => {
-  return Object.values(AppRole).includes(role as AppRole);
+  return allRoles.includes(role as AppRole);
 };
 
 // Generate canAccess functions dynamically
@@ -31,7 +31,7 @@ export function useRolePermissions() {
   };
 
   const isRole = (role: AppRole): boolean => userRole === role;
-  const isSuperAdmin = (): boolean => userRole === AppRole.SUPER_ADMIN;
+  const isSuperAdmin = (): boolean => userRole === 'super_admin';
 
   // Generate canAccessXXX functions dynamically
   const canAccessFunctions = useMemo(() => {

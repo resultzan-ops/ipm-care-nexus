@@ -4,6 +4,8 @@ export type AppRole =
   | "admin_kalibrasi" 
   | "admin_penyedia"
   | "admin_klien"
+  | "operator_klien"
+  | "teknisi_mitra"
   | "kalibrator"
   | "teknisi"
   | "operator"
@@ -65,6 +67,16 @@ export const ROLE_PERMISSIONS: Record<AppRole, Permission[]> = {
     "user_management",
     "settings"
   ],
+  operator_klien: [
+    "dashboard",
+    "equipment"
+  ],
+  teknisi_mitra: [
+    "dashboard",
+    "maintenance",
+    "inspections",
+    "equipment"
+  ],
   kalibrator: [
     "dashboard",
     "calibrations",
@@ -92,6 +104,8 @@ export const ROLE_DISPLAY_NAMES: Record<AppRole, string> = {
   admin_kalibrasi: "Admin Kalibrasi", 
   admin_penyedia: "Admin Penyedia",
   admin_klien: "Admin Klien",
+  operator_klien: "Operator Klien",
+  teknisi_mitra: "Teknisi Mitra",
   kalibrator: "Kalibrator",
   teknisi: "Teknisi",
   operator: "Operator",
@@ -138,6 +152,8 @@ export const allRoles: AppRole[] = [
   "admin_kalibrasi",
   "admin_penyedia", 
   "admin_klien",
+  "operator_klien",
+  "teknisi_mitra",
   "kalibrator",
   "teknisi",
   "operator",

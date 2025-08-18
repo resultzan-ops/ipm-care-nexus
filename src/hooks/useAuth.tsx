@@ -79,20 +79,30 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     let isMounted = true;
 
-    const handleAuthChange = async (_event: string, session: Session | null) => {
+    const handleAuthChange = (_event: string, session: Session | null) => {
       if (!isMounted) return;
       setSession(session);
       setUser(session?.user ?? null);
       setError(null);
 
-      setLoading(true);
       if (session?.user) {
-        const profileData = await fetchProfile(session.user.id);
-        if (isMounted) setProfile(profileData);
+        setLoading(true);
+        setTimeout(() => {
+          fetchProfile(session.user!.id)
+            .then((profileData) => {
+              if (!isMounted) return;
+              setProfile(profileData);
+              setLoading(false);
+            })
+            .catch((err) => {
+              console.error('Auth state profile fetch error:', err);
+              if (isMounted) setLoading(false);
+            });
+        }, 0);
       } else {
         setProfile(null);
+        setLoading(false);
       }
-      setLoading(false);
     };
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(handleAuthChange);

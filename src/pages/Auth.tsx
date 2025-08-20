@@ -9,7 +9,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { supabase } from '@/integrations/supabase/client';
 import { Hospital, Loader2 } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
-
 export default function Auth() {
   const [loading, setLoading] = useState(false);
   const [email, setEmail] = useState('');
@@ -17,29 +16,31 @@ export default function Auth() {
   const [name, setName] = useState('');
   const [error, setError] = useState('');
   const navigate = useNavigate();
-
   useEffect(() => {
     // Check if user is already logged in
     const checkUser = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
+      const {
+        data: {
+          session
+        }
+      } = await supabase.auth.getSession();
       if (session) {
         navigate('/');
       }
     };
     checkUser();
   }, [navigate]);
-
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError('');
-
     try {
-      const { error } = await supabase.auth.signInWithPassword({
+      const {
+        error
+      } = await supabase.auth.signInWithPassword({
         email,
-        password,
+        password
       });
-
       if (error) {
         if (error.message.includes('Invalid login credentials')) {
           setError('Email atau password salah');
@@ -51,7 +52,7 @@ export default function Auth() {
       } else {
         toast({
           title: "Login berhasil",
-          description: "Selamat datang di IPM Care Nexus",
+          description: "Selamat datang di IPM Care Nexus"
         });
         navigate('/');
       }
@@ -61,16 +62,15 @@ export default function Auth() {
       setLoading(false);
     }
   };
-
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError('');
-
     try {
       const redirectUrl = `${window.location.origin}/`;
-      
-      const { error } = await supabase.auth.signUp({
+      const {
+        error
+      } = await supabase.auth.signUp({
         email,
         password,
         options: {
@@ -80,7 +80,6 @@ export default function Auth() {
           }
         }
       });
-
       if (error) {
         if (error.message.includes('User already registered')) {
           setError('Email sudah terdaftar, silakan login');
@@ -92,7 +91,7 @@ export default function Auth() {
       } else {
         toast({
           title: "Registrasi berhasil",
-          description: "Silakan cek email untuk konfirmasi akun",
+          description: "Silakan cek email untuk konfirmasi akun"
         });
         // Switch to login tab
         const loginTab = document.querySelector('[value="login"]') as HTMLElement;
@@ -104,15 +103,13 @@ export default function Auth() {
       setLoading(false);
     }
   };
-
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-background to-muted flex items-center justify-center p-4">
+  return <div className="min-h-screen bg-gradient-to-br from-background to-muted flex items-center justify-center p-4">
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
           <div className="flex items-center justify-center mb-4">
             <Hospital className="h-12 w-12 text-primary" />
           </div>
-          <h1 className="text-3xl font-bold text-foreground mb-2">IPM Care Nexus</h1>
+          <h1 className="text-3xl font-bold text-foreground mb-2">IPM Virtual Softlab Medicare</h1>
           <p className="text-muted-foreground">Sistem Manajemen Peralatan Medis</p>
         </div>
 
@@ -132,32 +129,16 @@ export default function Auth() {
                 <form onSubmit={handleSignIn} className="space-y-4">
                   <div className="space-y-2">
                     <Label htmlFor="email">Email</Label>
-                    <Input
-                      id="email"
-                      type="email"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      placeholder="user@example.com"
-                      required
-                    />
+                    <Input id="email" type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="user@example.com" required />
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="password">Password</Label>
-                    <Input
-                      id="password"
-                      type="password"
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      placeholder="Masukkan password"
-                      required
-                    />
+                    <Input id="password" type="password" value={password} onChange={e => setPassword(e.target.value)} placeholder="Masukkan password" required />
                   </div>
                   
-                  {error && (
-                    <Alert variant="destructive">
+                  {error && <Alert variant="destructive">
                       <AlertDescription>{error}</AlertDescription>
-                    </Alert>
-                  )}
+                    </Alert>}
                   
                   <Button type="submit" className="w-full" disabled={loading}>
                     {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
@@ -170,43 +151,20 @@ export default function Auth() {
                 <form onSubmit={handleSignUp} className="space-y-4">
                   <div className="space-y-2">
                     <Label htmlFor="name">Nama Lengkap</Label>
-                    <Input
-                      id="name"
-                      type="text"
-                      value={name}
-                      onChange={(e) => setName(e.target.value)}
-                      placeholder="Masukkan nama lengkap"
-                      required
-                    />
+                    <Input id="name" type="text" value={name} onChange={e => setName(e.target.value)} placeholder="Masukkan nama lengkap" required />
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="email">Email</Label>
-                    <Input
-                      id="email"
-                      type="email"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      placeholder="user@example.com"
-                      required
-                    />
+                    <Input id="email" type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="user@example.com" required />
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="password">Password</Label>
-                    <Input
-                      id="password"
-                      type="password"
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      placeholder="Minimal 6 karakter"
-                      required
-                    />
+                    <Input id="password" type="password" value={password} onChange={e => setPassword(e.target.value)} placeholder="Minimal 6 karakter" required />
                   </div>
                   
-                  {error && (
-                    <Alert variant="destructive">
+                  {error && <Alert variant="destructive">
                       <AlertDescription>{error}</AlertDescription>
-                    </Alert>
-                  )}
+                    </Alert>}
                   
                   <Button type="submit" className="w-full" disabled={loading}>
                     {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
@@ -222,6 +180,5 @@ export default function Auth() {
           <p>Demo Account: dayax19@gmail.com / Masuk123$</p>
         </div>
       </div>
-    </div>
-  );
+    </div>;
 }

@@ -115,7 +115,7 @@ export const MENU_STRUCTURE: MenuItem[] = [
     icon: Building,
     label: "Perusahaan & User",
     href: "#",
-    permission: "company_management",
+    permission: "user_management", // Changed to user_management so super_admin can see it
     submenu: [
       {
         icon: Building2,
@@ -145,7 +145,7 @@ export const MENU_STRUCTURE: MenuItem[] = [
         icon: FileText,
         label: "Global Reports",
         href: "/global-reports",
-        permission: "user_management",
+        permission: "global_reports",
       }
     ],
   },

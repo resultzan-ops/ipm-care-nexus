@@ -1,6 +1,5 @@
 import { useAuth } from "@/hooks/useAuth";
 import Dashboard from "./Dashboard";
-import SuperAdminDashboard from "./SuperAdminDashboard";
 import { AuthDebug } from "@/components/debug/AuthDebug";
 import { Loader2 } from "lucide-react";
 
@@ -27,14 +26,10 @@ const Index = () => {
     );
   }
   
-  // FIXED: Use actual role from profile, not email checking
+  // Use actual role from profile
   const userRole = profile?.role || "operator";
   
-  // Route to appropriate dashboard based on actual role
-  if (userRole === "super_admin") {
-    return <SuperAdminDashboard />;
-  }
-  
+  // All users use the same dashboard with role-based menu access
   return <Dashboard />;
 };
 

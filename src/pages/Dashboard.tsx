@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Link, useNavigate } from "react-router-dom";
+import { useAuth } from "@/hooks/useAuth";
 import { 
   Calendar,
   Plus, 
@@ -76,8 +77,9 @@ const upcomingTasks = [
 ];
 
 export default function Dashboard() {
-  const userRole = "super_admin"; // Updated to show full super_admin menu
-  const tenantName = "IPM System";
+  const { profile } = useAuth();
+  const userRole = (profile?.role as any) || "operator_klien";
+  const tenantName = profile?.company_id ? "IPM System" : "IPM System";
   const navigate = useNavigate();
   const [qrModalOpen, setQrModalOpen] = useState(false);
   const [selectedEquipment, setSelectedEquipment] = useState<any>(null);

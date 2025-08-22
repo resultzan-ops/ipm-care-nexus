@@ -22,6 +22,7 @@ export function Sidebar({ userRole }: SidebarProps) {
   // Get user permissions based on role
   const userPermissions = getRolePermissions(userRole);
 
+  console.log('Sidebar Debug:', { userRole, userPermissions, menuStructure: MENU_STRUCTURE });
   // Initialize expanded submenus - all submenus expanded by default
   useEffect(() => {
     const savedState = localStorage.getItem('sidebar-expanded-submenus');
@@ -82,9 +83,10 @@ export function Sidebar({ userRole }: SidebarProps) {
 
       <nav className="flex-1 p-4 space-y-2 overflow-y-auto">
         {MENU_STRUCTURE.map((item) => {
-          const isVisible = isMenuItemVisible(item, userPermissions);
+          // For super_admin, show all menu items
+          const isVisible = userRole === 'super_admin' || isMenuItemVisible(item, userPermissions);
           const visibleSubmenus = item.submenu 
-            ? getVisibleSubmenuItems(item.submenu, userPermissions) 
+            ? (userRole === 'super_admin' ? item.submenu : getVisibleSubmenuItems(item.submenu, userPermissions))
             : [];
 
           return (

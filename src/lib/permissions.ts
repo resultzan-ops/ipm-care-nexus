@@ -44,19 +44,27 @@ export const ROLE_PERMISSIONS: Record<AppRole, Permission[]> = {
     "settings",
     "tasks"
   ],
-  admin_kalibrasi: [
+  admin_mitra: [
     "dashboard",
-    "calibrations",
     "equipment",
+    "maintenance",
+    "inspections",
+    "calibrations",
+    "reports",
+    "monitoring",
+    "tools",
+    "download",
     "user_management",
-    "settings",
+    "settings", 
     "tasks"
   ],
-  admin_penyedia: [
+  teknisi_mitra: [
     "dashboard",
     "equipment",
-    "user_management", 
-    "settings"
+    "maintenance",
+    "inspections",
+    "calibrations",
+    "tasks"
   ],
   admin_klien: [
     "dashboard",
@@ -64,6 +72,7 @@ export const ROLE_PERMISSIONS: Record<AppRole, Permission[]> = {
     "maintenance",
     "inspections", 
     "calibrations",
+    "reports",
     "user_management",
     "settings"
   ],
@@ -71,45 +80,14 @@ export const ROLE_PERMISSIONS: Record<AppRole, Permission[]> = {
     "dashboard",
     "equipment"
   ],
-  teknisi_mitra: [
-    "dashboard",
-    "maintenance",
-    "inspections",
-    "equipment"
-  ],
-  kalibrator: [
-    "dashboard",
-    "calibrations",
-    "tasks"
-  ],
-  teknisi: [
-    "dashboard",
-    "maintenance",
-    "inspections",
-    "equipment"
-  ],
-  operator: [
-    "dashboard",
-    "equipment"
-  ],
-  spv: [
-    "dashboard",
-    "monitoring",
-    "reports"
-  ],
 };
 
 export const ROLE_DISPLAY_NAMES: Record<AppRole, string> = {
   super_admin: "Super Admin",
-  admin_kalibrasi: "Admin Kalibrasi", 
-  admin_penyedia: "Admin Penyedia",
+  admin_mitra: "Admin Mitra",
+  teknisi_mitra: "Teknisi Mitra",
   admin_klien: "Admin Klien",
   operator_klien: "Operator Klien",
-  teknisi_mitra: "Teknisi Mitra",
-  kalibrator: "Kalibrator",
-  teknisi: "Teknisi",
-  operator: "Operator",
-  spv: "SPV (Supervisor)",
 };
 
 export function hasPermission(role: AppRole, permission: Permission): boolean {
@@ -149,13 +127,8 @@ export const allPermissions: Permission[] = [
 // Export all roles array for validation
 export const allRoles: AppRole[] = [
   "super_admin",
-  "admin_kalibrasi",
-  "admin_penyedia", 
+  "admin_mitra",
+  "teknisi_mitra",
   "admin_klien",
   "operator_klien",
-  "teknisi_mitra",
-  "kalibrator",
-  "teknisi",
-  "operator",
-  "spv"
 ];

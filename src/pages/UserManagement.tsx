@@ -128,7 +128,7 @@ export default function UserManagement() {
     }
   };
 
-  const getStatusBadge = (isActive: boolean) => {
+  if (profile?.role !== 'super_admin') {
     return (
       <Badge variant={isActive ? "default" : "secondary"}>
         {isActive ? "Active" : "Inactive"}
@@ -154,7 +154,7 @@ export default function UserManagement() {
   const stats = getStatistics();
 
   return (
-    <DashboardLayout userRole={profile?.role as any || "teknisi"} tenantName="IPM Care Nexus">
+    <DashboardLayout userRole="super_admin" tenantName="IPM Care Nexus">
       <div className="space-y-6">
         <div className="flex items-center justify-between">
           <div>

@@ -78,7 +78,7 @@ export default function Maintenance() {
           user_id, 
           name, 
           role,
-          tenants(id, name, type)
+          tenants!profiles_company_id_fkey(id, nama_perusahaan, company_type)
         `)
         .in('role', ['teknisi_mitra'])
         .eq('is_active', true);
@@ -106,10 +106,9 @@ export default function Maintenance() {
         .from('pm_schedules')
         .select(`
           *,
-          equipment(name, location),
+          equipment(name, location, tenants(id, name, type)),
           profiles!pm_schedules_assigned_to_fkey(name),
-          created_by_profile:profiles!pm_schedules_created_by_fkey(name),
-          equipment!inner(tenants(id, name, type))
+          created_by_profile:profiles!pm_schedules_created_by_fkey(name)
         `)
         .order('scheduled_date', { ascending: true });
       

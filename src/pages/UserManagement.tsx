@@ -128,13 +128,26 @@ export default function UserManagement() {
     }
   };
 
-  if (profile?.role !== 'super_admin') {
+  const getStatusBadge = (isActive: boolean) => {
     return (
       <Badge variant={isActive ? "default" : "secondary"}>
         {isActive ? "Active" : "Inactive"}
       </Badge>
     );
   };
+
+  if (profile?.role !== 'super_admin') {
+    return (
+      <DashboardLayout>
+        <div className="flex items-center justify-center h-96">
+          <div className="text-center">
+            <h1 className="text-2xl font-bold text-muted-foreground">Access Denied</h1>
+            <p className="text-muted-foreground">You don't have permission to access this page.</p>
+          </div>
+        </div>
+      </DashboardLayout>
+    );
+  }
 
   const getStatistics = () => {
     const total = profiles.length;

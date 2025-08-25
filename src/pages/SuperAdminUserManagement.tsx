@@ -1,9 +1,9 @@
-import { SuperAdminLayout } from "@/components/layouts/SuperAdminLayout";
+import { DashboardLayout } from "@/components/dashboard/layout";
 import { EnhancedUserManagement } from "@/components/super-admin/EnhancedUserManagement";
 
 export default function SuperAdminUserManagement() {
   return (
-    <SuperAdminLayout>
+    <DashboardLayout userRole="super_admin">
       <div className="space-y-6">
         <div>
           <h1 className="text-3xl font-bold">User Management</h1>
@@ -13,6 +13,6 @@ export default function SuperAdminUserManagement() {
         </div>
         <EnhancedUserManagement />
       </div>
-    </SuperAdminLayout>
+    </DashboardLayout>
   );
 }

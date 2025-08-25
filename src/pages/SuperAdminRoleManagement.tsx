@@ -1,9 +1,9 @@
-import { SuperAdminLayout } from "@/components/layouts/SuperAdminLayout";
+import { DashboardLayout } from "@/components/dashboard/layout";
 import { RolePermissionManager } from "@/components/super-admin/RolePermissionManager";
 
 export default function SuperAdminRoleManagement() {
   return (
-    <SuperAdminLayout>
+    <DashboardLayout userRole="super_admin">
       <div className="space-y-6">
         <div>
           <h1 className="text-3xl font-bold">Role Management</h1>
@@ -13,6 +13,6 @@ export default function SuperAdminRoleManagement() {
         </div>
         <RolePermissionManager />
       </div>
-    </SuperAdminLayout>
+    </DashboardLayout>
   );
 }
